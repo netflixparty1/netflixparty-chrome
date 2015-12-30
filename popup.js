@@ -30,16 +30,9 @@ $(function() {
         return showError('Open a video in Netflix first.');
       }
 
-      // get the domain
-      var domain = null;
-      var matches = tabs[0].url.match(/^http(?:s?):\/\/([^/]*)/);
-      if (matches) {
-        domain = matches[1].toLowerCase();
-      }
-      
       // parse the video ID from the URL
       var videoId = null;
-      matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
+      var matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
       if (matches) {
         videoId = parseInt(matches[1]);
       } else {
