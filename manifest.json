@@ -1,24 +1,29 @@
 {
   "manifest_version": 2,
 
-  "name": "Netflix Party",
-  "description": "A tool for synchronized Netflix consumption.",
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
   "version": "1.0.8",
+  "default_locale": "en",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "declarativeContent"
   ],
-  "browser_action": {
+  "page_action": {
     "default_icon": {
-      "19":  "icon.png",
-      "38":  "icon.png",
-      "128": "icon.png"
+      "19": "icons/19.png",
+      "38": "icons/38.png"
     },
+    "default_title": "__MSG_extName__",
     "default_popup": "popup.html"
   },
-  "icons":
-    {
-      "19":  "icon.png",
-      "38":  "icon.png",
-      "128": "icon.png"
-    }
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
 }

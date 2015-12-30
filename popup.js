@@ -30,26 +30,9 @@ $(function() {
         return showError('Open a video in Netflix first.');
       }
 
-      // get the domain
-      var domain = null;
-      var matches = tabs[0].url.match(/^http(?:s?):\/\/([^/]*)/);
-      if (matches) {
-        domain = matches[1].toLowerCase();
-      } else {
-        // example cause: files served over the file:// protocol
-        return showError('Open a video in Netflix first.');
-      }
-      if (/^http(?:s?):\/\/chrome\.google\.com\/webstore.*/.test(tabs[0].url)) {
-        // technical reason: Chrome prevents content scripts from running in the app gallery
-        return showError('Open a video in Netflix first.');
-      }
-      if (domain !== 'www.netflix.com') {
-        return showError('Open a video in Netflix first.');
-      }
-
       // parse the video ID from the URL
       var videoId = null;
-      matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
+      var matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
       if (matches) {
         videoId = parseInt(matches[1]);
       } else {
@@ -92,11 +75,7 @@ $(function() {
         // disabled the "Join session" button when the session ID hasn't changed
         var updateJoinSessionEnabled = function() {
           var sessionId = $('#session-id').val();
-          if ((session && sessionId === session.id) || sessionId.trim() === '') {
-            $('#join-session').prop('disabled', true);
-          } else {
-            $('#join-session').prop('disabled', false);
-          }
+          $('#join-session').prop('disabled', ((session && sessionId === session.id) || sessionId.trim() === ''));
         };
         $('#session-id').bind('propertychange change click keyup input paste', updateJoinSessionEnabled);
 
@@ -147,6 +126,8 @@ $(function() {
             session = data;
             $('#session-id').val(session.id);
             updateJoinSessionEnabled();
+            $('#session-id').focus();
+            $('#session-id').select();
             sendMessage('setSession', session, function(response) {
               sendMessage('start', { joiningOther: false }, function(response) {});
             });
