@@ -57,6 +57,21 @@ $(function() {
           $('#session-id').val(session.id);
         }
 
+        // set up the spinner
+        var spinnerRefCount = 0;
+        var startSpinning = function() {
+          if (spinnerRefCount === 0) {
+            $('#spinner').removeClass('hidden');
+          }
+          spinnerRefCount += 1;
+        };
+        var stopSpinning = function() {
+          spinnerRefCount -= 1;
+          if (spinnerRefCount === 0) {
+            $('#spinner').addClass('hidden');
+          }
+        };
+
         // disabled the "Join session" button when the session ID hasn't changed
         var updateJoinSessionEnabled = function() {
           var sessionId = $('#session-id').val();
@@ -73,7 +88,7 @@ $(function() {
 
         $('#join-session').click(function() {
           var sessionId = $('#session-id').val();
-          $('#spinner').toggleClass('hidden');
+          startSpinning();
           $.ajax({
             url: 'https://www.netflixparty.com/sessions/' + sessionId,
             method: 'GET'
@@ -95,12 +110,12 @@ $(function() {
               return showError('Uh oh! Something went wrong.');
             }
           }).always(function() {
-            $('#spinner').toggleClass('hidden');
+            stopSpinning();
           });
         });
 
         $('#new-session').click(function() {
-          $('#spinner').toggleClass('hidden');
+          startSpinning();
           $.ajax({
             url: 'https://www.netflixparty.com/sessions/create',
             method: 'POST',
@@ -119,7 +134,7 @@ $(function() {
           }).fail(function(jqXHR, textStatus, errorThrown) {
             return showError('Uh oh! Something went wrong.');
           }).always(function() {
-            $('#spinner').toggleClass('hidden');
+            stopSpinning();
           });
         });
       });
