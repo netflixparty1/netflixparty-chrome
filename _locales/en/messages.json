@@ -1,0 +1,10 @@
+{
+	"extName": {
+		"message": "Netflix Party",
+		"description": "Extension name"
+	},
+	"extDescription": {
+		"message": "A tool for synchronized Netflix consumption",
+		"description": "Extension description"
+	}
+}

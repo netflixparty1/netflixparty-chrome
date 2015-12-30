@@ -1,9 +1,10 @@
 {
   "manifest_version": 2,
 
-  "name": "Netflix Party",
-  "description": "A tool for synchronized Netflix consumption.",
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
   "version": "1.0.8",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "declarativeContent"
