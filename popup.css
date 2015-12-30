@@ -35,14 +35,6 @@ input, p {
   margin: 16px;
 }
 
-.small-top-margin {
-  margin-top: 4px;
-}
-
-.small-bottom-margin {
-  margin-bottom: 4px;
-}
-
 .error {
   color: #c00;
 }
