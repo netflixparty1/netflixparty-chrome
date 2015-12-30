@@ -11,20 +11,19 @@
   ],
   "page_action": {
     "default_icon": {
-      "19":  "icon.png",
-      "38":  "icon.png",
-      "128": "icon.png"
+      "19": "icons/19.png",
+      "38": "icons/38.png"
     },
+    "default_title": "__MSG_extName__",
     "default_popup": "popup.html"
   },
-  "icons":
-    {
-      "19":  "icon.png",
-      "38":  "icon.png",
-      "128": "icon.png"
-    }
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
 }
