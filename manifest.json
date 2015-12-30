@@ -5,9 +5,10 @@
   "description": "A tool for synchronized Netflix consumption.",
   "version": "1.0.8",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "declarativeContent"
   ],
-  "browser_action": {
+  "page_action": {
     "default_icon": {
       "19":  "icon.png",
       "38":  "icon.png",
@@ -21,4 +22,8 @@
       "38":  "icon.png",
       "128": "icon.png"
     }
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
 }

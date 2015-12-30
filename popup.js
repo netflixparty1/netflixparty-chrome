@@ -35,18 +35,8 @@ $(function() {
       var matches = tabs[0].url.match(/^http(?:s?):\/\/([^/]*)/);
       if (matches) {
         domain = matches[1].toLowerCase();
-      } else {
-        // example cause: files served over the file:// protocol
-        return showError('Open a video in Netflix first.');
       }
-      if (/^http(?:s?):\/\/chrome\.google\.com\/webstore.*/.test(tabs[0].url)) {
-        // technical reason: Chrome prevents content scripts from running in the app gallery
-        return showError('Open a video in Netflix first.');
-      }
-      if (domain !== 'www.netflix.com') {
-        return showError('Open a video in Netflix first.');
-      }
-
+      
       // parse the video ID from the URL
       var videoId = null;
       matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
@@ -147,6 +137,8 @@ $(function() {
             session = data;
             $('#session-id').val(session.id);
             updateJoinSessionEnabled();
+            $('#session-id').focus();
+            $('#session-id').select();
             sendMessage('setSession', session, function(response) {
               sendMessage('start', { joiningOther: false }, function(response) {});
             });
