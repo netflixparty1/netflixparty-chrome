@@ -1,18 +1,5 @@
 'use strict';
 
-// make sure we are in strict mode
-(function() {
-  var strictMode = false;
-  try {
-    NaN = NaN;
-  } catch (err) {
-    strictMode = true;
-  }
-  if (!strictMode) {
-    throw 'Unable to activate strict mode.';
-  }
-})();
-
 (function() {
   // make sure the content script is only run once on the page
   if (!window.netflixPartyLoaded) {

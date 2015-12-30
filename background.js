@@ -1,6 +1,6 @@
 'use strict';
 
-// Only load for netflix.com domain
+// only load for URLs that match www.netflix.com/watch/*
 chrome.runtime.onInstalled.addListener(function(details) {
 	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
 		chrome.declarativeContent.onPageChanged.addRules([{
@@ -9,11 +9,11 @@ chrome.runtime.onInstalled.addListener(function(details) {
 					pageUrl: {
 						hostEquals: 'www.netflix.com',
 						pathPrefix: '/watch/',
-						schemes: [ 'http', 'https' ]
+						schemes: ['http', 'https']
 					}
 				})
 			],
-			actions: [ new chrome.declarativeContent.ShowPageAction() ]
+			actions: [new chrome.declarativeContent.ShowPageAction()]
 		}]);
 	});
 });
