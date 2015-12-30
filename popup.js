@@ -60,11 +60,7 @@ $(function() {
         // disabled the "Join session" button when the session ID hasn't changed
         var updateJoinSessionEnabled = function() {
           var sessionId = $('#session-id').val();
-          if ((session && sessionId === session.id) || sessionId.trim() === '') {
-            $('#join-session').prop('disabled', true);
-          } else {
-            $('#join-session').prop('disabled', false);
-          }
+          $('#join-session').prop('disabled', ((session && sessionId === session.id) || sessionId.trim() === ''));
         };
         $('#session-id').bind('propertychange change click keyup input paste', updateJoinSessionEnabled);
 
