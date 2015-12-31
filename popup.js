@@ -83,7 +83,7 @@ $(function() {
 
         // listen for the enter key in the session id field
         $('#session-id').keydown(function(e) {
-          if (e.which === 13) {
+          if (e.which === 13 && !$('#join-session').prop('disabled')) {
             $('#join-session').click();
           }
         });
