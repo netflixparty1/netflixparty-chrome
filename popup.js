@@ -54,7 +54,7 @@ $(function() {
       // get the session if there is one
       sendMessage('getSession', {}, function(session) {
         if (session) {
-          $('#session-id').val(session.id);
+          $('#session-id').val(session.id).focus().select();
         }
 
         // set up the spinner
@@ -124,10 +124,8 @@ $(function() {
             })
           }).done(function(data, textStatus, jqXHR) {
             session = data;
-            $('#session-id').val(session.id);
+            $('#session-id').val(session.id).focus().select();
             updateJoinSessionEnabled();
-            $('#session-id').focus();
-            $('#session-id').select();
             sendMessage('setSession', session, function(response) {
               sendMessage('start', { joiningOther: false }, function(response) {});
             });
