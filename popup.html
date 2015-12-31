@@ -2,22 +2,56 @@
 <html>
   <head>
     <title>Netflix Party</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="popup.css">
-    <script type="text/javascript" src="jquery.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        margin: 15px 0;
+        width: 300px;
+      }
+
+      .btn-group {
+        width: 100%;
+      }
+
+      .btn-group button {
+        width: 50%;
+      }
+
+      .glyphicon-spin {
+        animation: spin 2000ms infinite linear;
+      }
+      @keyframes spin {
+        0% {
+         transform: rotate(0deg);
+        }
+        100% {
+         transform: rotate(359deg);
+        }
+      }
+    </style>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="popup.js"></script>
   </head>
   <body>
-    <div class="no-error">
-      <input id="session-id" type="text" autocomplete="off" autofocus placeholder="Session ID"/>
-      <p>
-        <button id="join-session" type="button" disabled="true">Join Session</button>
-        <button id="new-session" type="button">New Session</button>
-        <i id="spinner" class="fa fa-circle-o-notch fa-spin hidden"></i>
-      </p>
-    </div>
-    <div class="some-error hidden">
-      <p id="error-msg" class="error"></p>
+    <div class="container">
+      <div class="no-error">
+        <div class="input-group">
+          <input id="session-id" type="text" class="form-control" autocomplete="off" autofocus placeholder="Session ID"/>
+          <span class="input-group-btn">
+            <button id="copySpinner" class="btn btn-default">
+              <span class="glyphicon glyphicon-copy"></span>
+            </button>
+          </span>
+        </div>
+        <div class="btn-group" role="group">
+          <button id="join-session" class="btn btn-default" disabled>Join Session</button>
+          <button id="new-session" class="btn btn-default">New Session</button>
+        </div>
+      </div>
+      <div class="alert alert-danger hidden" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span id="error-msg" class="text-danger"></span>
+      </div>
     </div>
   </body>
 </html>
