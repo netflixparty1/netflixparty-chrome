@@ -305,6 +305,8 @@
             }).then(tick);
           } else if (state !== 'loading') {
             refreshSession().then(tick);
+          } else {
+            tick();
           }
         } else {
           tick();
