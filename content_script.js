@@ -157,7 +157,7 @@
         scrubber[0].dispatchEvent(new MouseEvent('mousedown', eventOptions));
         scrubber[0].dispatchEvent(new MouseEvent('mouseup', eventOptions));
         scrubber[0].dispatchEvent(new MouseEvent('mouseout', eventOptions));
-      }).then(delay(1)).then(function() {
+      }).then(delay(1)).then(hideControls).then(function() {
         uiEventsHappening -= 1;
       });
     };
