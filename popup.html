@@ -34,23 +34,25 @@
   </head>
   <body>
     <div class="container">
-      <div class="no-error">
-        <div class="input-group">
-          <input id="session-id" type="text" class="form-control" autocomplete="off" autofocus placeholder="Session ID"/>
-          <span class="input-group-btn">
-            <button id="copySpinner" class="btn btn-default">
-              <span class="glyphicon glyphicon-copy"></span>
-            </button>
-          </span>
-        </div>
+      <div class="input-group">
+        <input id="session-id" type="text" class="form-control" autocomplete="off" autofocus placeholder="Session ID"/>
+        <span class="input-group-btn">
+          <button id="copySpinner" class="btn btn-default">
+            <span class="glyphicon glyphicon-copy"></span>
+          </button>
+        </span>
+      </div>
+      <div class="btn-group btn-group-justified" role="group">
         <div class="btn-group" role="group">
           <button id="join-session" class="btn btn-default" disabled>Join Session</button>
+        </div>
+        <div class="btn-group" role="group">
           <button id="new-session" class="btn btn-default">New Session</button>
         </div>
       </div>
-      <div class="alert alert-danger hidden" role="alert">
-        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        <span id="error-msg" class="text-danger"></span>
+      <div class="alert alert-danger" role="alert" style="display:none">
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        <span id="error-msg"></span>
       </div>
     </div>
   </body>

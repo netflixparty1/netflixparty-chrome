@@ -20,9 +20,10 @@ $(function() {
       currentWindow: true
     }, function(tabs) {
       var showError = function(err) {
-        $('.alert').removeClass('hidden');
-        $('.no-error').addClass('hidden');
         $('#error-msg').text(err);
+        $('.alert').fadeIn(function() {
+          $(this).delay(4000).fadeOut();
+        });
       };
 
       // make sure we got the tab
@@ -61,16 +62,14 @@ $(function() {
         var spinnerRefCount = 0;
         var startSpinning = function() {
           if (spinnerRefCount === 0) {
-            $('#copySpinner span').removeClass('glyphicon-copy')
-            .addClass('glyphicon-refresh glyphicon-spin');
+            $('#copySpinner span').removeClass('glyphicon-copy').addClass('glyphicon-refresh glyphicon-spin');
           }
           spinnerRefCount += 1;
         };
         var stopSpinning = function() {
           spinnerRefCount -= 1;
           if (spinnerRefCount === 0) {
-            $('#copySpinner span').removeClass('glyphicon-refresh glyphicon-spin')
-            .addClass('glyphicon-copy');
+            $('#copySpinner span').removeClass('glyphicon-refresh glyphicon-spin').addClass('glyphicon-copy');
           }
         };
 
@@ -90,8 +89,7 @@ $(function() {
         });
 
         $('#copySpinner').click(function(e) {
-          $('#session-id').focus();
-          $('#session-id').select();
+          $('#session-id').focus().select();
           document.execCommand('copy');
           e.preventDefault();
         });
