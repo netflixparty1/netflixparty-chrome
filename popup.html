@@ -2,132 +2,56 @@
 <html>
   <head>
     <title>Netflix Party</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <style type="text/css">
-      html {
-        margin: 0;
-        padding: 0;
-      }
-
       body {
-        margin: 0;
-        padding: 0;
-        width: 332px;
-        font-family: sans-serif;
-        font-size: 0.9em;
-        color: #333;
-      }
-
-      input {
-        display: block;
-        box-sizing: border-box;
+        margin: 15px 0;
         width: 300px;
-        height: 40px;
-        border: 2px solid #ddd;
-        border-radius: 2px;
-        padding: 8px 12px;
-        margin: 16px;
-        outline-style: none;
-        line-height: 20px;
-        font-size: 1.2em;
-        color: inherit;
       }
 
-      input:focus {
-        border-color: #f872ae;
+      .btn-group {
+        width: 100%;
       }
 
-      input, p {
-        margin: 16px;
+      .btn-group button {
+        width: 50%;
       }
 
-      .small-top-margin {
-        margin-top: 4px;
+      .glyphicon-spin {
+        animation: spin 2000ms infinite linear;
       }
-
-      .small-bottom-margin {
-        margin-bottom: 4px;
-      }
-
-      .error {
-        color: #c00;
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      button {
-        height: 40px;
-        line-height: 24px;
-        display: inline-block;
-        vertical-align: middle;
-        font-weight: 400;
-        font-size: 0.9em;
-        -webkit-border-radius: 2px;
-        -moz-border-radius:    2px;
-        -ms-border-radius:     2px;
-        -o-border-radius:      2px;
-        border-radius:         2px;
-        border-style: none;
-        padding: 8px 16px;
-        cursor: pointer;
-        background-color: #bc2f64;
-        border-bottom: 3px solid #862052;
-        color: #ffe8f3;
-      }
-
-      button:hover {
-        background-color: #ce346e;
-        border-bottom: 3px solid #862052;
-        color: #ffe8f3;
-      }
-
-      button:focus {
-        background-color: #ce346e;
-        border-bottom: 3px solid #862052;
-        color: #ffe8f3;
-        outline-style: none;
-      }
-
-      button:active {
-        background-color: #862052;
-        border-bottom: 3px solid #862052;
-        color: #dac6d0;
-      }
-
-      button:disabled {
-        cursor: default;
-        background-color: #794e66;
-        border-bottom: 3px solid #59424d;
-        color: #b7acb6;
-      }
-
-      button.selected {
-        cursor: default;
-        background-color: #862052;
-        border-bottom: 3px solid #862052;
-        color: #f1dbe6;
-      }
-
-      #spinner {
-        margin-left: 32px;
+      @keyframes spin {
+        0% {
+         transform: rotate(0deg);
+        }
+        100% {
+         transform: rotate(359deg);
+        }
       }
     </style>
-    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="popup.js"></script>
   </head>
   <body>
-    <div class="no-error">
-      <input id="session-id" type="text" autocomplete="off" autofocus placeholder="Session ID"/>
-      <p>
-        <button id="join-session" type="button" disabled="true">Join Session</button>
-        <button id="new-session" type="button">New Session</button>
-        <i id="spinner" class="fa fa-circle-o-notch fa-spin hidden"></i>
-      </p>
-    </div>
-    <div class="some-error hidden">
-      <p id="error-msg" class="error"></p>
+    <div class="container">
+      <div class="no-error">
+        <div class="input-group">
+          <input id="session-id" type="text" class="form-control" autocomplete="off" autofocus placeholder="Session ID"/>
+          <span class="input-group-btn">
+            <button id="copySpinner" class="btn btn-default">
+              <span class="glyphicon glyphicon-copy"></span>
+            </button>
+          </span>
+        </div>
+        <div class="btn-group" role="group">
+          <button id="join-session" class="btn btn-default" disabled>Join Session</button>
+          <button id="new-session" class="btn btn-default">New Session</button>
+        </div>
+      </div>
+      <div class="alert alert-danger hidden" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span id="error-msg" class="text-danger"></span>
+      </div>
     </div>
   </body>
 </html>

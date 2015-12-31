@@ -20,9 +20,9 @@ $(function() {
       currentWindow: true
     }, function(tabs) {
       var showError = function(err) {
-        $('.some-error').removeClass('hidden');
+        $('.alert').removeClass('hidden');
         $('.no-error').addClass('hidden');
-        $('#error-msg').html(err);
+        $('#error-msg').text(err);
       };
 
       // make sure we got the tab
@@ -61,14 +61,16 @@ $(function() {
         var spinnerRefCount = 0;
         var startSpinning = function() {
           if (spinnerRefCount === 0) {
-            $('#spinner').removeClass('hidden');
+            $('#copySpinner span').removeClass('glyphicon-copy')
+            .addClass('glyphicon-refresh glyphicon-spin');
           }
           spinnerRefCount += 1;
         };
         var stopSpinning = function() {
           spinnerRefCount -= 1;
           if (spinnerRefCount === 0) {
-            $('#spinner').addClass('hidden');
+            $('#copySpinner span').removeClass('glyphicon-refresh glyphicon-spin')
+            .addClass('glyphicon-copy');
           }
         };
 
@@ -76,6 +78,7 @@ $(function() {
         var updateJoinSessionEnabled = function() {
           var sessionId = $('#session-id').val();
           $('#join-session').prop('disabled', ((session && sessionId === session.id) || sessionId.trim() === ''));
+          $('#copySpinner').prop('disabled', (sessionId.length <= 0));
         };
         $('#session-id').bind('propertychange change click keyup input paste', updateJoinSessionEnabled);
 
@@ -84,6 +87,13 @@ $(function() {
           if (e.which === 13) {
             $('#join-session').click();
           }
+        });
+
+        $('#copySpinner').click(function(e) {
+          $('#session-id').focus();
+          $('#session-id').select();
+          document.execCommand('copy');
+          e.preventDefault();
         });
 
         $('#join-session').click(function() {
