@@ -21,7 +21,14 @@
     var uiEventsHappening = 0;
 
     // video duration in milliseconds
-    var duration = Math.floor(jQuery('.player-video-wrapper video')[0].duration * 1000);
+    var lastDuration = 60 * 60 * 1000;
+    var getDuration = function() {
+      var video = jQuery('.player-video-wrapper video');
+      if (video.length > 0) {
+        lastDuration = Math.floor(video[0].duration * 1000);
+      }
+      return lastDuration;
+    };
 
     // 'playing', 'paused', 'loading', or 'idle'
     var getState = function() {
@@ -137,7 +144,7 @@
         showControls().then(function() {
           // compute the parameters for the mouse events
           var scrubber = jQuery('#scrubber-component');
-          var factor = milliseconds / duration;
+          var factor = milliseconds / getDuration();
           var mouseX = scrubber.offset().left + Math.round(scrubber.width() * factor); // relative to the document
           var mouseY = scrubber.offset().top + scrubber.height() / 2;                  // relative to the document
           var eventOptions = {
