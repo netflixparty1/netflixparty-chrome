@@ -271,18 +271,18 @@
       var state = getState();
       if (session && uiEventsHappening === 0) {
         if (state === 'idle') {
-          wakeUp().then(delay(2000)).then(tick);
+          wakeUp().then(delay(1000)).then(tick);
         } else if (needToBroadcast) {
           broadcastSession().then(function() {
             needToBroadcast = false;
-          }).catch(function() {}).then(delay(2000)).then(tick);
+          }).catch(function() {}).then(delay(1000)).then(tick);
         } else if (state !== 'loading') {
-          refreshSession().catch(function() {}).then(delay(2000)).then(tick);
+          refreshSession().catch(function() {}).then(delay(1000)).then(tick);
         } else {
-          delay(2000)().then(tick);
+          delay(100)().then(tick);
         }
       } else {
-        delay(2000)().then(tick);
+        delay(100)().then(tick);
       }
     };
     tick();
