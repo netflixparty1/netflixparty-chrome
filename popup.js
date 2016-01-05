@@ -1,83 +1,90 @@
 'use strict';
 
-// make sure we are in strict mode
-(function() {
-  var strictMode = false;
-  try {
-    NaN = NaN;
-  } catch (err) {
-    strictMode = true;
-  }
-  if (!strictMode) {
-    throw 'Unable to activate strict mode.';
-  }
-})();
-
 $(function() {
   // get the current tab
   chrome.tabs.query({
       active: true,
       currentWindow: true
     }, function(tabs) {
+      // parse the video ID from the URL
+      var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
+
+      // error handling
       var showError = function(err) {
         $('.some-error').removeClass('hidden');
         $('.no-error').addClass('hidden');
         $('#error-msg').html(err);
       };
 
-      // make sure we got the tab
-      if (tabs.length !== 1) {
-        return showError('Open a video in Netflix first.');
-      }
+      $('#close-error').click(function() {
+        $('.no-error').removeClass('hidden');
+        $('.some-error').addClass('hidden');
+        $('#session-id').focus();
+      });
 
-      // parse the video ID from the URL
-      var videoId = null;
-      var matches = tabs[0].url.match(/^.*\/([0-9]+)\??.*/);
-      if (matches) {
-        videoId = parseInt(matches[1]);
-      } else {
-        return showError('Open a video first.');
-      }
+      // connected/disconnected state
+      var showConnected = function(sessionId) {
+        $('.disconnected').addClass('hidden');
+        $('.connected').removeClass('hidden');
+        $('#session-id').prop('readonly', true).val(sessionId).focus().select();
+      };
+
+      var showDisconnected = function() {
+        $('.disconnected').removeClass('hidden');
+        $('.connected').addClass('hidden');
+        $('#session-id').prop('readonly', false).val('').focus();
+      };
+
+      // set up the spinner
+      var startSpinning = function() {
+        $('#spinner').removeClass('hidden');
+        $('#session-id').prop('disabled', true);
+        $('#join-session').prop('disabled', true);
+        $('#create-session').prop('disabled', true);
+        $('#leave-session').prop('disabled', true);
+      };
+
+      var stopSpinning = function() {
+        $('#spinner').addClass('hidden');
+        $('#session-id').prop('disabled', false);
+        $('#join-session').prop('disabled', false);
+        $('#create-session').prop('disabled', false);
+        $('#leave-session').prop('disabled', false);
+      };
 
       // send a message to the content script
       var sendMessage = function(type, data, callback) {
+        startSpinning();
         chrome.tabs.executeScript(tabs[0].id, {
           file: 'content_script.js'
         }, function() {
           chrome.tabs.sendMessage(tabs[0].id, {
             type: type,
             data: data
-          }, callback);
+          }, function(response) {
+            stopSpinning();
+            if (response.errorMessage) {
+              showError(response.errorMessage);
+              return;
+            }
+            if (callback) {
+              callback(response);
+            }
+          });
         });
       };
 
       // get the session if there is one
-      sendMessage('getSession', {}, function(session) {
-        if (session) {
-          $('#session-id').val(session.id).focus().select();
+      sendMessage('getSessionId', {}, function(response) {
+        if (response.errorMessage) {
+          showError(response.errorMessage);
+          return;
         }
-
-        // set up the spinner
-        var spinnerRefCount = 0;
-        var startSpinning = function() {
-          if (spinnerRefCount === 0) {
-            $('#spinner').removeClass('hidden');
-          }
-          spinnerRefCount += 1;
-        };
-        var stopSpinning = function() {
-          spinnerRefCount -= 1;
-          if (spinnerRefCount === 0) {
-            $('#spinner').addClass('hidden');
-          }
-        };
-
-        // disabled the "Join session" button when the session ID hasn't changed
-        var updateJoinSessionEnabled = function() {
-          var sessionId = $('#session-id').val();
-          $('#join-session').prop('disabled', ((session && sessionId === session.id) || sessionId.trim() === ''));
-        };
-        $('#session-id').bind('propertychange change click keyup input paste', updateJoinSessionEnabled);
+        if (response.sessionId === null) {
+          $('#session-id').focus();
+        } else {
+          showConnected(response.sessionId);
+        }
 
         // listen for the enter key in the session id field
         $('#session-id').keydown(function(e) {
@@ -88,51 +95,26 @@ $(function() {
 
         $('#join-session').click(function() {
           var sessionId = $('#session-id').val();
-          startSpinning();
-          $.ajax({
-            url: 'https://www.netflixparty.com/sessions/' + sessionId,
-            method: 'GET'
-          }).done(function(data, textStatus, jqXHR) {
-            if (data.videoId === videoId) {
-              session = data;
-              updateJoinSessionEnabled();
-              sendMessage('setSession', session, function(response) {
-                sendMessage('start', { joiningOther: true }, function(response) {});
-              });
-              window.close();
-            } else {
-              return showError('That session is for a different video.');
-            }
-          }).error(function(jqXHR, textStatus, errorThrown) {
-            if (jqXHR.status === 404) {
-              return showError('No session with that ID was found.');
-            } else {
-              return showError('Uh oh! Something went wrong.');
-            }
-          }).always(function() {
-            stopSpinning();
+          sendMessage('joinSession', {
+            sessionId: sessionId,
+            videoId: videoId
+          }, function(response) {
+            showConnected(sessionId);
+            window.close();
           });
         });
 
-        $('#new-session').click(function() {
-          startSpinning();
-          $.ajax({
-            url: 'https://www.netflixparty.com/sessions/create',
-            method: 'POST',
-            data: JSON.stringify({
-              videoId: videoId
-            })
-          }).done(function(data, textStatus, jqXHR) {
-            session = data;
-            $('#session-id').val(session.id).focus().select();
-            updateJoinSessionEnabled();
-            sendMessage('setSession', session, function(response) {
-              sendMessage('start', { joiningOther: false }, function(response) {});
-            });
-          }).fail(function(jqXHR, textStatus, errorThrown) {
-            return showError('Uh oh! Something went wrong.');
-          }).always(function() {
-            stopSpinning();
+        $('#create-session').click(function() {
+          sendMessage('createSession', {
+            videoId: videoId
+          }, function(response) {
+            showConnected(response.sessionId);
+          });
+        });
+
+        $('#leave-session').click(function() {
+          sendMessage('leaveSession', {}, function(response) {
+            showDisconnected();
           });
         });
       });

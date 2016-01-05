@@ -2,7 +2,7 @@
 
 Netflix Party is a simple extension for Netflix that allows you to synchronize video playback with other people on different computers. For example, you could use it to watch a movie with a special someone across a long physical distance. There is no limit to how many people can join a session, but each person must have a Netflix account.
 
-This is the client part. The source for the server can be found [here](https://github.com/boyers/netflixparty). The Chrome extension is published [here](https://chrome.google.com/webstore/detail/netflix-party/oocalimimngaihdkbihfgmpkcpnmlaoa) in the Chrome Web Store.
+This is the client. The source for the server can be found [here](https://github.com/boyers/netflixparty). The Chrome extension is published [here](https://chrome.google.com/webstore/detail/netflix-party/oocalimimngaihdkbihfgmpkcpnmlaoa) in the Chrome Web Store.
 
 ## License
 

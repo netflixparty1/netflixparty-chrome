@@ -28,7 +28,7 @@ input {
 }
 
 input:focus {
-  border-color: #f872ae;
+  border-color: #158cba;
 }
 
 input, p {
@@ -58,42 +58,35 @@ button {
   border-style: none;
   padding: 8px 16px;
   cursor: pointer;
-  background-color: #bc2f64;
-  border-bottom: 3px solid #862052;
-  color: #ffe8f3;
-}
-
-button:hover {
-  background-color: #ce346e;
-  border-bottom: 3px solid #862052;
-  color: #ffe8f3;
+  background-color: #158cba;
+  border-bottom: 3px solid #11698c;
+  color: #e8f4ff;
 }
 
 button:focus {
-  background-color: #ce346e;
-  border-bottom: 3px solid #862052;
-  color: #ffe8f3;
+  background-color: #158cba;
+  border-bottom: 3px solid #11698c;
+  color: #e8f4ff;
   outline-style: none;
 }
 
+button:hover {
+  background-color: #23a4d6;
+  border-bottom: 3px solid #1981ab;
+  color: #e8f4ff;
+}
+
 button:active {
-  background-color: #862052;
-  border-bottom: 3px solid #862052;
-  color: #dac6d0;
+  background-color: #12769c;
+  border-bottom: 3px solid #12769c;
+  color: #d9e3ec;
 }
 
 button:disabled {
   cursor: default;
-  background-color: #794e66;
-  border-bottom: 3px solid #59424d;
-  color: #b7acb6;
-}
-
-button.selected {
-  cursor: default;
-  background-color: #862052;
-  border-bottom: 3px solid #862052;
-  color: #f1dbe6;
+  background-color: #6ca7bd;
+  border-bottom: 3px solid #548294;
+  color: #f7f7f7;
 }
 
 #spinner {
