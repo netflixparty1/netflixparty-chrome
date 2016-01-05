@@ -276,7 +276,7 @@
     // we don't use HTTPS (WSS) here because CloudFlare (our CDN) only supports
     // websockets for "enterprise" customers. so for now we use HTTP (WS) and
     // bypass CloudFlare.
-    var socket = io('http://www.netflixparty.com');
+    var socket = io('http://api.netflixparty.com');
 
     // the session
     var sessionId = null;
