@@ -6,9 +6,6 @@ $(function() {
       active: true,
       currentWindow: true
     }, function(tabs) {
-      // parse the video ID from the URL
-      var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
-
       // error handling
       var showError = function(err) {
         $('.some-error').removeClass('hidden');
@@ -22,22 +19,9 @@ $(function() {
         $('#session-id').focus();
       });
 
-      // connected/disconnected state
-      var showConnected = function(sessionId) {
-        $('.disconnected').addClass('hidden');
-        $('.connected').removeClass('hidden');
-        $('#session-id').prop('readonly', true).val(sessionId).focus().select();
-      };
-
-      var showDisconnected = function() {
-        $('.disconnected').removeClass('hidden');
-        $('.connected').addClass('hidden');
-        $('#session-id').prop('readonly', false).val('').focus();
-      };
-
       // set up the spinner
       var startSpinning = function() {
-        $('#spinner').removeClass('hidden');
+        $('.spinner').removeClass('hidden');
         $('#session-id').prop('disabled', true);
         $('#join-session').prop('disabled', true);
         $('#create-session').prop('disabled', true);
@@ -45,7 +29,7 @@ $(function() {
       };
 
       var stopSpinning = function() {
-        $('#spinner').addClass('hidden');
+        $('.spinner').addClass('hidden');
         $('#session-id').prop('disabled', false);
         $('#join-session').prop('disabled', false);
         $('#create-session').prop('disabled', false);
@@ -74,17 +58,36 @@ $(function() {
         });
       };
 
+      // connected/disconnected state
+      var showConnected = function(sessionId) {
+        $('.disconnected').addClass('hidden');
+        $('.connected').removeClass('hidden');
+        $('#session-id').prop('readonly', true).val(sessionId).focus().select();
+        $('#show-chat').prop('checked', true);
+      };
+
+      var showDisconnected = function() {
+        $('.disconnected').removeClass('hidden');
+        $('.connected').addClass('hidden');
+        $('#session-id').prop('readonly', false).val('').focus();
+      };
+
       // get the session if there is one
-      sendMessage('getSessionId', {}, function(response) {
-        if (response.errorMessage) {
-          showError(response.errorMessage);
+      sendMessage('getInitData', {}, function(initData) {
+        // parse the video ID from the URL
+        var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
+
+        // initial state
+        if (initData.errorMessage) {
+          showError(initData.errorMessage);
           return;
         }
-        if (response.sessionId === null) {
+        if (initData.sessionId === null) {
           $('#session-id').focus();
         } else {
-          showConnected(response.sessionId);
+          showConnected(initData.sessionId);
         }
+        $('#show-chat').prop('checked', initData.chatVisible);
 
         // listen for the enter key in the session id field
         $('#session-id').keydown(function(e) {
@@ -100,7 +103,6 @@ $(function() {
             videoId: videoId
           }, function(response) {
             showConnected(sessionId);
-            window.close();
           });
         });
 
@@ -116,6 +118,10 @@ $(function() {
           sendMessage('leaveSession', {}, function(response) {
             showDisconnected();
           });
+        });
+
+        $('#show-chat').change(function() {
+          sendMessage('showChat', { visible: $('#show-chat').is(':checked') }, null);
         });
       });
     }

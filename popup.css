@@ -12,7 +12,13 @@ body {
   color: #333;
 }
 
-input {
+label {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+input[type="text"] {
   display: block;
   box-sizing: border-box;
   width: 300px;
@@ -27,11 +33,12 @@ input {
   color: inherit;
 }
 
-input:focus {
+input[type="text"]:focus {
   border-color: #158cba;
 }
 
-input, p {
+input[type="text"], p {
+  display: block;
   margin: 16px;
 }
 
@@ -89,6 +96,6 @@ button:disabled {
   color: #f7f7f7;
 }
 
-#spinner {
-  margin-left: 32px;
+.spinner {
+  margin-left: 8px;
 }
