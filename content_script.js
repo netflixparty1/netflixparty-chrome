@@ -482,12 +482,15 @@
           }, 500);
 
           if (e.which === 13) {
-            jQuery('#chat-input').prop('disabled', true);
-            socket.emit('sendMessage', {
-              body: jQuery('#chat-input').val()
-            }, function() {
-              jQuery('#chat-input').val('').prop('disabled', false).focus();
-            });
+            var body = jQuery('#chat-input').val().replace(/^\s+|\s+$/g, '');
+            if (body !== '') {
+              jQuery('#chat-input').prop('disabled', true);
+              socket.emit('sendMessage', {
+                body: body
+              }, function() {
+                jQuery('#chat-input').val('').prop('disabled', false).focus();
+              });
+            }
           }
         });
         jQuery('#chat-input-avatar').html(`<img src="data:image/png;base64,${new Identicon(Sha256.hash(userId).substr(0, 32), avatarSize * 2, 0).toString()}" />`);
