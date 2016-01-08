@@ -302,10 +302,12 @@
     var messages = [];
     var chatSidebarWidth = 360;
     var chatSidebarPadding = 16;
-    var avatarSize = 30;
+    var avatarSize = 20;
+    var avatarPadding = 4;
+    var avatarBorder = 2;
     var chatVericalMargin = 4;
     var chatInputBorder = 2;
-    var chatMessageHorizontalPadding = 12;
+    var chatMessageHorizontalPadding = 8;
     var chatMessageVerticalPadding = 8;
     var presenceIndicatorHeight = 30;
 
@@ -313,6 +315,10 @@
       <style>
         #netflix-player.with-chat {
           width: calc(100% - ${chatSidebarWidth}px) !important;
+        }
+
+        #chat-container, #chat-container * {
+          box-sizing: border-box;
         }
 
         #chat-container {
@@ -326,16 +332,16 @@
           user-select: text;
           -webkit-user-select: text;
           z-index: 9999999999;
-          box-sizing: border-box;
-          padding-left: ${chatSidebarPadding}px;
+          padding: ${chatSidebarPadding}px;
         }
 
         #chat-container #chat-history-container {
-          height: calc(100% - ${chatSidebarPadding + chatInputBorder * 2 + chatMessageVerticalPadding * 2 + avatarSize + chatVericalMargin * 2 + presenceIndicatorHeight}px);
+          height: calc(100% - ${chatMessageVerticalPadding * 2 + avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatVericalMargin * 2 + presenceIndicatorHeight}px);
           position: relative;
         }
 
         #chat-container #chat-history-container #chat-history {
+          width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
           position: absolute;
           left: 0;
           bottom: 0;
@@ -344,8 +350,6 @@
         }
 
         #chat-container #chat-history-container #chat-history .chat-message {
-          width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
-          box-sizing: border-box;
           background-color: #222;
           color: #999;
           padding: ${chatMessageVerticalPadding}px ${chatMessageHorizontalPadding}px;
@@ -357,8 +361,11 @@
 
         #chat-container #chat-history-container #chat-history .chat-message .chat-message-avatar {
           float: left;
-          width: ${avatarSize}px;
-          height: ${avatarSize}px;
+          width: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
+          height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
+          padding: ${avatarPadding}px;
+          border: ${avatarBorder}px solid #444;
+          border-radius: 2px;
         }
 
         #chat-container #chat-history-container #chat-history .chat-message .chat-message-avatar img {
@@ -368,13 +375,13 @@
         }
 
         #chat-container #chat-history-container #chat-history .chat-message .chat-message-body {
-          padding-left: ${avatarSize + chatMessageHorizontalPadding}px;
+          padding-left: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageHorizontalPadding}px;
         }
 
         #chat-container #presence-indicator {
           position: absolute;
           left: ${chatSidebarPadding}px;
-          bottom: ${chatSidebarPadding + chatInputBorder * 2 + chatMessageVerticalPadding * 2 + avatarSize + chatVericalMargin}px;
+          bottom: ${chatSidebarPadding + chatMessageVerticalPadding * 2 + avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatVericalMargin}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
           height: ${presenceIndicatorHeight}px;
           line-height: ${presenceIndicatorHeight}px;
@@ -384,8 +391,7 @@
 
         #chat-container #chat-input-container {
           position: absolute;
-          box-sizing: border-box;
-          height: ${chatInputBorder * 2 + chatMessageVerticalPadding * 2 + avatarSize}px;
+          height: ${chatMessageVerticalPadding * 2 + avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
           left: ${chatSidebarPadding}px;
           bottom: ${chatSidebarPadding}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
@@ -398,11 +404,14 @@
 
         #chat-container #chat-input-container #chat-input-avatar {
           float: left;
-          width: ${avatarSize}px;
-          height: ${avatarSize}px;
-          margin-left: ${chatMessageHorizontalPadding}px;
-          margin-top: ${chatMessageVerticalPadding}px;
-          margin-bottom: ${chatMessageVerticalPadding}px;
+          width: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
+          height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
+          padding: ${avatarPadding}px;
+          border: ${avatarBorder}px solid #333;
+          margin-left: ${chatMessageHorizontalPadding - chatInputBorder}px;
+          margin-top: ${chatMessageVerticalPadding - chatInputBorder}px;
+          margin-bottom: ${chatMessageVerticalPadding - chatInputBorder}px;
+          border-radius: 2px;
         }
 
         #chat-container #chat-input-container #chat-input-avatar img {
@@ -413,16 +422,18 @@
 
         #chat-container #chat-input-container #chat-input {
           display: block;
-          box-sizing: border-box;
-          height: ${avatarSize + chatMessageVerticalPadding * 2}px;
-          line-height: ${avatarSize}px;
-          width: ${chatSidebarWidth - chatSidebarPadding * 2 - chatInputBorder * 2 - chatMessageHorizontalPadding - avatarSize}px;
-          margin-left: ${avatarSize + chatMessageHorizontalPadding}px;
+          height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageVerticalPadding * 2 - chatInputBorder * 2}px;
+          line-height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
+          width: ${chatSidebarWidth - chatSidebarPadding * 2 - avatarSize - avatarPadding * 2 - avatarBorder * 2 - chatMessageHorizontalPadding - chatInputBorder}px;
+          margin-left: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageHorizontalPadding - chatInputBorder}px;
           background-color: #111;
           border: none;
           outline-style: none;
           color: #999;
-          padding: ${chatMessageVerticalPadding}px ${chatMessageHorizontalPadding}px;
+          padding-top: ${chatMessageVerticalPadding - chatInputBorder}px;
+          padding-right: ${chatMessageHorizontalPadding - chatInputBorder}px;
+          padding-bottom: ${chatMessageVerticalPadding - chatInputBorder}px;
+          padding-left: ${chatMessageHorizontalPadding}px;
         }
       </style>
       <div id="chat-container">
