@@ -96,6 +96,7 @@ $(function() {
           }
         });
 
+        // listen for clicks on the "Join session" button
         $('#join-session').click(function() {
           var sessionId = $('#session-id').val();
           sendMessage('joinSession', {
@@ -106,6 +107,7 @@ $(function() {
           });
         });
 
+        // listen for clicks on the "Create session" button
         $('#create-session').click(function() {
           sendMessage('createSession', {
             videoId: videoId
@@ -114,12 +116,14 @@ $(function() {
           });
         });
 
+        // listen for clicks on the "Leave session" button
         $('#leave-session').click(function() {
           sendMessage('leaveSession', {}, function(response) {
             showDisconnected();
           });
         });
 
+        // listen for clicks on the "Show chat" checkbox
         $('#show-chat').change(function() {
           sendMessage('showChat', { visible: $('#show-chat').is(':checked') }, null);
         });

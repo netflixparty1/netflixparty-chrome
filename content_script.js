@@ -36,6 +36,7 @@
     // minimum amount of delta (in ms) to broadcast
     var minTimeDelta = 100;
 
+    // returns an action which delays for some time
     var delay = function(milliseconds) {
       return function(result) {
         return new Promise(function(resolve, reject) {
@@ -46,23 +47,27 @@
       };
     };
 
-    var delayUntil = function(condition, maxAttempts) {
-      return function() {
-        var attempts = 0;
+    // returns an action which waits until the condition thunk returns true,
+    // rejecting if maxDelay time is exceeded
+    var delayUntil = function(condition, maxDelay) {
+      return function(result) {
+        var delayStep = 500;
+        var startTime = (new Date()).getTime();
         var checkForCondition = function() {
           if (condition()) {
-            return Promise.resolve();
+            return Promise.resolve(result);
           }
-          attempts += 1;
-          if (attempts === maxAttempts) {
-            return Promise.reject(Error('max number of attempts in delayUntil'));
+          if (maxDelay !== null && (new Date()).getTime() - startTime > maxDelay) {
+            return Promise.reject(Error('delayUntil timed out'));
           }
-          return delay(500)().then(checkForCondition);
+          return delay(delayStep)().then(checkForCondition);
         };
         return checkForCondition();
       };
     };
 
+    // add value to the end of array, and remove items from the beginning
+    // such that the length does not exceed limit
     var shove = function(array, value, limit) {
       array.push(value);
       if (array.length > limit) {
@@ -70,10 +75,12 @@
       }
     };
 
+    // compute the mean of an array of numbers
     var mean = function(array) {
       return array.reduce(function(a, b) { return a + b; }) / array.length;
     };
 
+    // compute the median of an array of numbers
     var median = function(array) {
       return array.concat().sort()[Math.floor(array.length / 2)];
     };
@@ -123,7 +130,7 @@
       jQuery('.timeout-wrapper.player-active .icon-play').click();
       return delayUntil(function() {
         return getState() !== 'idle';
-      }, 5)().catch(function(e) {
+      }, 2500)().catch(function(e) {
         // timed out
       }).then(function() {
         uiEventsHappening -= 1;
@@ -142,7 +149,7 @@
       scrubber[0].dispatchEvent(new MouseEvent('mousemove', eventOptions));
       return delayUntil(function() {
         return scrubber.is(':visible');
-      }, 5)().catch(function(e) {
+      }, 2500)().catch(function(e) {
         // timed out
       }).then(function() {
         uiEventsHappening -= 1;
@@ -180,7 +187,7 @@
       jQuery('.player-play-pause.pause').click();
       return delayUntil(function() {
         return getState() === 'paused';
-      }, 5)().catch(function(e) {
+      }, 2500)().catch(function(e) {
         // timed out
       }).then(hideControls).then(function() {
         uiEventsHappening -= 1;
@@ -193,14 +200,14 @@
       jQuery('.player-play-pause.play').click();
       return delayUntil(function() {
         return getState() === 'playing';
-      }, 5)().catch(function(e) {
+      }, 2500)().catch(function(e) {
         // timed out
       }).then(hideControls).then(function() {
         uiEventsHappening -= 1;
       });
     };
 
-    // freeze for some time
+    // freeze playback for some time and then play
     var freeze = function(milliseconds) {
       return function() {
         uiEventsHappening += 1;
@@ -209,7 +216,7 @@
           jQuery('.player-play-pause.play').click();
         }).then(delayUntil(function() {
           return getState() === 'playing';
-        }, 5)).catch(function(e) {
+        }, 2500)).catch(function(e) {
           // timed out
         }).then(hideControls).then(function() {
           uiEventsHappening -= 1;
@@ -254,7 +261,7 @@
         }).then(delayUntil(function() {
           // wait for the trickplay preview to show up
           return jQuery('.trickplay-preview').is(':visible');
-        }, 5)).catch(function(e) {
+        }, 2500)).catch(function(e) {
           // timed out
         }).then(function() {
           // simulate a click on the scrubber
@@ -265,7 +272,7 @@
           // wait until the seeking is done
           newPlaybackPosition = getPlaybackPosition();
           return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= minTimeDelta;
-        }, 5)).catch(function(e) {
+        }, 2500)).catch(function(e) {
           // timed out
         }).then(function() {
           // compute mean seek error for next time
@@ -299,6 +306,7 @@
     // Chat API                                                             //
     //////////////////////////////////////////////////////////////////////////
 
+    // chat state
     var messages = [];
     var chatSidebarWidth = 360;
     var chatSidebarPadding = 16;
@@ -311,6 +319,7 @@
     var chatMessageVerticalPadding = 8;
     var presenceIndicatorHeight = 30;
 
+    // this is the markup that needs to be injected onto the page for chat
     var chatHtml = `
       <style>
         #netflix-player.with-chat {
@@ -448,8 +457,10 @@
       </div>
     `;
 
+    // this is used for the chat presence feature
     var typingTimer = null;
 
+    // set up the chat state, or reset the state if the system has already been set up
     var initChat = function() {
       if (jQuery('#chat-container').length === 0) {
         jQuery('#netflix-player').after(chatHtml);
@@ -499,10 +510,12 @@
       }
     };
 
+    // query whether the chat sidebar is visible
     var getChatVisible = function() {
       return jQuery('#netflix-player').hasClass('with-chat');
     };
 
+    // show or hide the chat sidebar
     var setChatVisible = function(visible) {
       if (visible) {
         jQuery('#netflix-player').addClass('with-chat');
@@ -513,6 +526,7 @@
       }
     };
 
+    // show or hide the "People are typing..." indicator
     var setPresenceVisible = function(visible) {
       if (visible) {
         jQuery('#presence-indicator').show();
@@ -521,6 +535,7 @@
       }
     };
 
+    // add a message to the chat history
     var addMessage = function(message) {
       messages.push(message);
       jQuery('#chat-history').append(`
@@ -532,10 +547,12 @@
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
     };
 
+    // receive messages from the server
     socket.on('sendMessage', function(data) {
       addMessage(data);
     });
 
+    // receive presence updates from the server
     socket.on('setPresence', function(data) {
       setPresenceVisible(data.anyoneTyping);
     });
@@ -576,6 +593,8 @@
     };
     pingpong();
 
+    // this function should be called periodically to ensure that the Netflix player
+    // matches our internal representation of the playback state
     var sync = function() {
       if (sessionId !== null) {
         if (state === 'paused') {
@@ -593,7 +612,7 @@
         } else {
           return delayUntil(function() {
             return getState() !== 'loading';
-          }, 5)().catch(function(e) {
+          }, 2500)().catch(function(e) {
             // timed out
           }).then(function() {
             var localTime = getPlaybackPosition();
@@ -616,6 +635,9 @@
       }
     };
 
+    // this is called when we need to send an update to the server
+    // waitForChange is a boolean that indicates whether we should wait for
+    // the Netflix player to update itself before we broadcast
     var broadcast = function(waitForChange) {
       return function() {
         var promise;
@@ -626,7 +648,7 @@
             var newPlaybackPosition = getPlaybackPosition();
             var newState = getState();
             return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= minTimeDelta || newState !== oldState || newState === 'loading';
-          }, 5)().catch(function(e) {
+          }, 2500)().catch(function(e) {
             // timed out
           });
         } else {
@@ -635,7 +657,7 @@
 
         return promise.then(delayUntil(function() {
           return getState() !== 'loading';
-        }, null)).then(function() {
+        }, Infinity)).then(function() {
           var now = new Date();
           var localTime = getPlaybackPosition();
           var serverTime = lastKnownTime + (state === 'playing' ? (now.getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
@@ -660,6 +682,7 @@
       };
     };
 
+    // this is called when data is received from the server
     var receive = function(data) {
       lastKnownTime = data.lastKnownTime;
       lastKnownTimeUpdatedAt = new Date(data.lastKnownTimeUpdatedAt);
@@ -667,6 +690,7 @@
       return sync;
     };
 
+    // the following allows us to linearize all tasks in the program to avoid interference
     var tasks = null;
     var tasksInFlight = 0;
 
@@ -686,12 +710,14 @@
       });
     };
 
+    // synchronize every 5 seconds just in case
     setInterval(function() {
       if (tasksInFlight === 0) {
         pushTask(sync);
       }
     }, 5000);
 
+    // broadcast the playback state if there is any user activity
     jQuery(window).mouseup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
         pushTask(broadcast(true));
