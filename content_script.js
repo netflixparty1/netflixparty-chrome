@@ -85,6 +85,22 @@
       return array.concat().sort()[Math.floor(array.length / 2)];
     };
 
+    // swallow any errors from an action
+    var swallow = function(action) {
+      return function(result) {
+        return action(result).catch(function(e) {});
+      };
+    };
+
+    // promise.ensure(fn) method
+    // note that this method will not swallow errors
+    Promise.prototype.ensure = function(fn) {
+      return this.then(fn, function(e) {
+        fn();
+        throw e;
+      });
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Netflix API                                                          //
     //////////////////////////////////////////////////////////////////////////
@@ -130,9 +146,7 @@
       jQuery('.timeout-wrapper.player-active .icon-play').click();
       return delayUntil(function() {
         return getState() !== 'idle';
-      }, 2500)().catch(function(e) {
-        // timed out
-      }).then(function() {
+      }, 2500)().ensure(function() {
         uiEventsHappening -= 1;
       });
     };
@@ -149,9 +163,7 @@
       scrubber[0].dispatchEvent(new MouseEvent('mousemove', eventOptions));
       return delayUntil(function() {
         return scrubber.is(':visible');
-      }, 2500)().catch(function(e) {
-        // timed out
-      }).then(function() {
+      }, 1000)().ensure(function() {
         uiEventsHappening -= 1;
       });
     };
@@ -176,7 +188,7 @@
         'currentTarget': player[0]
       };
       player[0].dispatchEvent(new MouseEvent('mousemove', eventOptions));
-      return delay(1)().then(function() {
+      return delay(1)().ensure(function() {
         uiEventsHappening -= 1;
       });
     };
@@ -187,9 +199,7 @@
       jQuery('.player-play-pause.pause').click();
       return delayUntil(function() {
         return getState() === 'paused';
-      }, 2500)().catch(function(e) {
-        // timed out
-      }).then(hideControls).then(function() {
+      }, 1000)().then(hideControls).ensure(function() {
         uiEventsHappening -= 1;
       });
     };
@@ -200,9 +210,7 @@
       jQuery('.player-play-pause.play').click();
       return delayUntil(function() {
         return getState() === 'playing';
-      }, 2500)().catch(function(e) {
-        // timed out
-      }).then(hideControls).then(function() {
+      }, 2500)().then(hideControls).ensure(function() {
         uiEventsHappening -= 1;
       });
     };
@@ -214,11 +222,7 @@
         jQuery('.player-play-pause.pause').click();
         return delay(milliseconds)().then(function() {
           jQuery('.player-play-pause.play').click();
-        }).then(delayUntil(function() {
-          return getState() === 'playing';
-        }, 2500)).catch(function(e) {
-          // timed out
-        }).then(hideControls).then(function() {
+        }).then(hideControls).ensure(function() {
           uiEventsHappening -= 1;
         });
       };
@@ -233,9 +237,6 @@
         uiEventsHappening += 1;
         var eventOptions, scrubber, oldPlaybackPosition, newPlaybackPosition;
         return showControls().then(function() {
-          // remember the old position
-          oldPlaybackPosition = getPlaybackPosition();
-
           // compute the parameters for the mouse events
           scrubber = jQuery('#scrubber-component');
           var factor = (milliseconds - seekErrorMean) / getDuration();
@@ -261,9 +262,10 @@
         }).then(delayUntil(function() {
           // wait for the trickplay preview to show up
           return jQuery('.trickplay-preview').is(':visible');
-        }, 2500)).catch(function(e) {
-          // timed out
-        }).then(function() {
+        }, 2500)).then(function() {
+          // remember the old position
+          oldPlaybackPosition = getPlaybackPosition();
+
           // simulate a click on the scrubber
           scrubber[0].dispatchEvent(new MouseEvent('mousedown', eventOptions));
           scrubber[0].dispatchEvent(new MouseEvent('mouseup', eventOptions));
@@ -271,16 +273,15 @@
         }).then(delayUntil(function() {
           // wait until the seeking is done
           newPlaybackPosition = getPlaybackPosition();
-          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= minTimeDelta;
-        }, 2500)).catch(function(e) {
-          // timed out
-        }).then(function() {
+          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 1 || Math.abs(newPlaybackPosition - milliseconds) < minTimeDelta;
+        }, 5000)).then(function() {
           // compute mean seek error for next time
           var newSeekError = Math.min(Math.max(newPlaybackPosition - milliseconds, -10000), 10000);
           shove(seekErrorRecent, newSeekError, 5);
           seekErrorMean = mean(seekErrorRecent);
+        }).then(hideControls).ensure(function() {
           uiEventsHappening -= 1;
-        }).then(hideControls);
+        });
       };
     };
 
@@ -596,42 +597,41 @@
     // this function should be called periodically to ensure that the Netflix player
     // matches our internal representation of the playback state
     var sync = function() {
-      if (sessionId !== null) {
-        if (state === 'paused') {
-          var promise;
-          if (getState() === 'paused') {
-            promise = Promise.resolve();
-          } else {
-            promise = pause();
-          }
-          return promise.then(function() {
-            if (Math.abs(lastKnownTime - getPlaybackPosition()) > 2000) {
-              return seek(lastKnownTime)();
-            }
-          });
+      if (sessionId == null) {
+        return Promise.resolve();
+      }
+      if (state === 'paused') {
+        var promise;
+        if (getState() === 'paused') {
+          promise = Promise.resolve();
         } else {
-          return delayUntil(function() {
-            return getState() !== 'loading';
-          }, 2500)().catch(function(e) {
-            // timed out
-          }).then(function() {
-            var localTime = getPlaybackPosition();
-            var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
-            if (Math.abs(localTime - serverTime) > 1000) {
-              return seek(serverTime + 2000)().then(function() {
-                var localTime = getPlaybackPosition();
-                var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
-                if (localTime > serverTime && localTime < serverTime + 4000) {
-                  return freeze(localTime - serverTime)();
-                } else {
-                  return play();
-                }
-              });
-            } else {
-              return play();
-            }
-          });
+          promise = pause();
         }
+        return promise.then(function() {
+          if (Math.abs(lastKnownTime - getPlaybackPosition()) > 2000) {
+            return seek(lastKnownTime)();
+          }
+        });
+      } else {
+        return delayUntil(function() {
+          return getState() !== 'loading';
+        }, 2500)().then(function() {
+          var localTime = getPlaybackPosition();
+          var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
+          if (Math.abs(localTime - serverTime) > 1000) {
+            return seek(serverTime + 2000)().then(function() {
+              var localTime = getPlaybackPosition();
+              var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
+              if (localTime > serverTime && localTime < serverTime + 4000) {
+                return freeze(localTime - serverTime)();
+              } else {
+                return play();
+              }
+            });
+          } else {
+            return play();
+          }
+        });
       }
     };
 
@@ -648,9 +648,7 @@
             var newPlaybackPosition = getPlaybackPosition();
             var newState = getState();
             return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= minTimeDelta || newState !== oldState || newState === 'loading';
-          }, 2500)().catch(function(e) {
-            // timed out
-          });
+          }, 2500)();
         } else {
           promise = Promise.resolve();
         }
@@ -687,7 +685,7 @@
       lastKnownTime = data.lastKnownTime;
       lastKnownTimeUpdatedAt = new Date(data.lastKnownTimeUpdatedAt);
       state = data.state;
-      return sync;
+      return swallow(sync);
     };
 
     // the following allows us to linearize all tasks in the program to avoid interference
@@ -710,23 +708,23 @@
       });
     };
 
-    // synchronize every 5 seconds just in case
+    // synchronize every second just in case
     setInterval(function() {
       if (tasksInFlight === 0) {
-        pushTask(sync);
+        pushTask(swallow(sync));
       }
-    }, 5000);
+    }, 1000);
 
     // broadcast the playback state if there is any user activity
     jQuery(window).mouseup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(broadcast(true));
+        pushTask(swallow(broadcast(true)));
       }
     });
 
     jQuery(window).keyup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(broadcast(true));
+        pushTask(swallow(broadcast(true)));
       }
     });
 
@@ -808,7 +806,7 @@
             sessionId = data.sessionId;
             state = data.state;
             videoId = request.data.videoId;
-            pushTask(broadcast(false));
+            pushTask(swallow(broadcast(false)));
             sendResponse({
               sessionId: sessionId
             });
