@@ -102,7 +102,7 @@ $(function() {
         $('#join-session').click(function() {
           var sessionId = $('#session-id').val();
           sendMessage('joinSession', {
-            sessionId: sessionId,
+            sessionId: sessionId.replace(/^\s+|\s+$/g, '').toLowerCase(),
             videoId: videoId
           }, function(response) {
             showConnected(sessionId);
