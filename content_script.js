@@ -39,9 +39,6 @@
     // Helpers                                                              //
     //////////////////////////////////////////////////////////////////////////
 
-    // minimum amount of delta (in ms) to broadcast
-    var minTimeDelta = 100;
-
     // returns an action which delays for some time
     var delay = function(milliseconds) {
       return function(result) {
@@ -57,7 +54,7 @@
     // rejecting if maxDelay time is exceeded
     var delayUntil = function(condition, maxDelay) {
       return function(result) {
-        var delayStep = 500;
+        var delayStep = 250;
         var startTime = (new Date()).getTime();
         var checkForCondition = function() {
           if (condition()) {
@@ -235,13 +232,12 @@
     };
 
     // jump to a specific time in the video
-    // this is, by far, the hackiest code I have ever written
     var seekErrorRecent = [];
     var seekErrorMean = 0;
     var seek = function(milliseconds) {
       return function() {
         uiEventsHappening += 1;
-        var eventOptions, scrubber, oldPlaybackPosition, newPlaybackPosition;
+        var eventOptions, scrubber, oldPlaybackPosition, newPlaybackPosition, wasEverLoading;
         return showControls().then(function() {
           // compute the parameters for the mouse events
           scrubber = jQuery('#scrubber-component');
@@ -276,10 +272,18 @@
           scrubber[0].dispatchEvent(new MouseEvent('mousedown', eventOptions));
           scrubber[0].dispatchEvent(new MouseEvent('mouseup', eventOptions));
           scrubber[0].dispatchEvent(new MouseEvent('mouseout', eventOptions));
+          wasEverLoading = false;
         }).then(delayUntil(function() {
+          if (getState() === 'loading') {
+            wasEverLoading = true;
+            return true;
+          } else {
+            return false;
+          }
+        }, 500)).then(delayUntil(function() {
           // wait until the seeking is done
           newPlaybackPosition = getPlaybackPosition();
-          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 1 || Math.abs(newPlaybackPosition - milliseconds) < minTimeDelta;
+          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 1 || (wasEverLoading && getState() !== 'loading');
         }, 5000)).then(function() {
           // compute mean seek error for next time
           var newSeekError = Math.min(Math.max(newPlaybackPosition - milliseconds, -10000), 10000);
@@ -574,6 +578,10 @@
     // Main logic                                                           //
     //////////////////////////////////////////////////////////////////////////
 
+    // the Netflix player be kept within this many milliseconds of our
+    // internal representation for the playback time
+    var maxTimeError = 2500;
+
     // the session
     var sessionId = null;
     var lastKnownTime = null;
@@ -606,8 +614,8 @@
     };
     pingpong();
 
-    // this function should be called periodically to ensure that the Netflix player
-    // matches our internal representation of the playback state
+    // this function should be called periodically to ensure the Netflix
+    // player matches our internal representation of the playback state
     var sync = function() {
       if (sessionId == null) {
         return Promise.resolve();
@@ -620,21 +628,21 @@
           promise = pause();
         }
         return promise.then(function() {
-          if (Math.abs(lastKnownTime - getPlaybackPosition()) > 2000) {
+          if (Math.abs(lastKnownTime - getPlaybackPosition()) > maxTimeError) {
             return seek(lastKnownTime)();
           }
         });
       } else {
         return delayUntil(function() {
           return getState() !== 'loading';
-        }, 2500)().then(function() {
+        }, Infinity)().then(function() {
           var localTime = getPlaybackPosition();
           var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
-          if (Math.abs(localTime - serverTime) > 1000) {
+          if (Math.abs(localTime - serverTime) > maxTimeError) {
             return seek(serverTime + 2000)().then(function() {
               var localTime = getPlaybackPosition();
               var serverTime = lastKnownTime + (state === 'playing' ? ((new Date()).getTime() - (lastKnownTimeUpdatedAt.getTime() + localTimeMinusServerTimeMedian)) : 0);
-              if (localTime > serverTime && localTime < serverTime + 4000) {
+              if (localTime > serverTime && localTime <= serverTime + maxTimeError) {
                 return freeze(localTime - serverTime)();
               } else {
                 return play();
@@ -659,7 +667,7 @@
           promise = delayUntil(function() {
             var newPlaybackPosition = getPlaybackPosition();
             var newState = getState();
-            return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= minTimeDelta || newState !== oldState || newState === 'loading';
+            return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 250 || newState !== oldState;
           }, 2500)();
         } else {
           promise = Promise.resolve();
@@ -674,7 +682,7 @@
           var newLastKnownTime = localTime;
           var newLastKnownTimeUpdatedAt = new Date(now.getTime() - localTimeMinusServerTimeMedian);
           var newState = getState() === 'playing' ? 'playing' : 'paused';
-          if (state === newState && Math.abs(localTime - serverTime) < minTimeDelta) {
+          if (state === newState && Math.abs(localTime - serverTime) < 1) {
             return Promise.resolve();
           } else {
             lastKnownTime = newLastKnownTime;
