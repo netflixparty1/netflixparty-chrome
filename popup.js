@@ -73,7 +73,9 @@ $(function() {
       };
 
       // get the session if there is one
-      sendMessage('getInitData', {}, function(initData) {
+      sendMessage('getInitData', {
+        version: chrome.app.getDetails().version
+      }, function(initData) {
         // parse the video ID from the URL
         var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
 
