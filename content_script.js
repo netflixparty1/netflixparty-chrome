@@ -489,19 +489,15 @@
         jQuery('#chat-input').keydown(function(e) {
           e.stopPropagation();
 
-          if (typingTimer === null) {
-            socket.emit('typing', { typing: true }, function() {});
-          } else {
-            clearTimeout(typingTimer);
-          }
-          typingTimer = setTimeout(function() {
-            typingTimer = null;
-            socket.emit('typing', { typing: false }, function() {});
-          }, 500);
-
           if (e.which === 13) {
             var body = jQuery('#chat-input').val().replace(/^\s+|\s+$/g, '');
             if (body !== '') {
+              if (typingTimer !== null) {
+                clearTimeout(typingTimer);
+                typingTimer = null;
+                socket.emit('typing', { typing: false }, function() {});
+              }
+
               jQuery('#chat-input').prop('disabled', true);
               socket.emit('sendMessage', {
                 body: body
@@ -509,6 +505,16 @@
                 jQuery('#chat-input').val('').prop('disabled', false).focus();
               });
             }
+          } else {
+            if (typingTimer === null) {
+              socket.emit('typing', { typing: true }, function() {});
+            } else {
+              clearTimeout(typingTimer);
+            }
+            typingTimer = setTimeout(function() {
+              typingTimer = null;
+              socket.emit('typing', { typing: false }, function() {});
+            }, 500);
           }
         });
         jQuery('#chat-input-avatar').html(`<img src="data:image/png;base64,${new Identicon(Sha256.hash(userId).substr(0, 32), avatarSize * 2, 0).toString()}" />`);
