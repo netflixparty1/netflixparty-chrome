@@ -106,7 +106,7 @@
         fn();
         throw e;
       });
-    }
+    };
 
     //////////////////////////////////////////////////////////////////////////
     // Netflix API                                                          //
@@ -241,7 +241,7 @@
     var seek = function(milliseconds) {
       return function() {
         uiEventsHappening += 1;
-        var eventOptions, scrubber, oldPlaybackPosition, newPlaybackPosition, wasEverLoading;
+        var eventOptions, scrubber, oldPlaybackPosition, newPlaybackPosition;
         return showControls().then(function() {
           // compute the parameters for the mouse events
           scrubber = jQuery('#scrubber-component');
@@ -276,18 +276,10 @@
           scrubber[0].dispatchEvent(new MouseEvent('mousedown', eventOptions));
           scrubber[0].dispatchEvent(new MouseEvent('mouseup', eventOptions));
           scrubber[0].dispatchEvent(new MouseEvent('mouseout', eventOptions));
-          wasEverLoading = false;
         }).then(delayUntil(function() {
-          if (getState() === 'loading') {
-            wasEverLoading = true;
-            return true;
-          } else {
-            return false;
-          }
-        }, 500)).then(delayUntil(function() {
           // wait until the seeking is done
           newPlaybackPosition = getPlaybackPosition();
-          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 1 || (wasEverLoading && getState() !== 'loading');
+          return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 1;
         }, 5000)).then(function() {
           // compute mean seek error for next time
           var newSeekError = Math.min(Math.max(newPlaybackPosition - milliseconds, -10000), 10000);
@@ -619,13 +611,13 @@
 
           resolve();
         });
-      })
+      });
     };
 
     // this function should be called periodically to ensure the Netflix
     // player matches our internal representation of the playback state
     var sync = function() {
-      if (sessionId == null) {
+      if (sessionId === null) {
         return Promise.resolve();
       }
       if (state === 'paused') {
@@ -672,11 +664,11 @@
         if (waitForChange) {
           var oldPlaybackPosition = getPlaybackPosition();
           var oldState = getState();
-          promise = delayUntil(function() {
+          promise = swallow(delayUntil(function() {
             var newPlaybackPosition = getPlaybackPosition();
             var newState = getState();
             return Math.abs(newPlaybackPosition - oldPlaybackPosition) >= 250 || newState !== oldState;
-          }, 2500)();
+          }, 2500))();
         } else {
           promise = Promise.resolve();
         }
@@ -743,7 +735,7 @@
       }
     });
 
-    jQuery(window).keyup(function() {
+    jQuery(window).keydown(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
         pushTask(broadcast(true));
       }
