@@ -90,9 +90,12 @@
     };
 
     // swallow any errors from an action
+    // and log them to the console
     var swallow = function(action) {
       return function(result) {
-        return action(result).catch(function(e) {});
+        return action(result).catch(function(e) {
+          console.error(e);
+        });
       };
     };
 
@@ -528,6 +531,16 @@
           }
         });
         jQuery('#chat-input-avatar').html(`<img src="data:image/png;base64,${new Identicon(Sha256.hash(userId).substr(0, 32), avatarSize * 2, 0).toString()}" />`);
+
+        // receive messages from the server
+        socket.on('sendMessage', function(data) {
+          addMessage(data);
+        });
+
+        // receive presence updates from the server
+        socket.on('setPresence', function(data) {
+          setPresenceVisible(data.anyoneTyping);
+        });
       } else {
         jQuery('#chat-history').html('');
       }
@@ -570,16 +583,6 @@
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
     };
 
-    // receive messages from the server
-    socket.on('sendMessage', function(data) {
-      addMessage(data);
-    });
-
-    // receive presence updates from the server
-    socket.on('setPresence', function(data) {
-      setPresenceVisible(data.anyoneTyping);
-    });
-
     //////////////////////////////////////////////////////////////////////////
     // Main logic                                                           //
     //////////////////////////////////////////////////////////////////////////
@@ -600,10 +603,10 @@
     var roundTripTimeMedian = 0;
     var localTimeMinusServerTimeRecent = [];
     var localTimeMinusServerTimeMedian = 0;
-    var pingpong = function() {
+    var ping = function() {
       return new Promise(function(resolve, reject) {
         var startTime = (new Date()).getTime();
-        socket.emit('ping', { version: version }, function(serverTime) {
+        socket.emit('getServerTime', { version: version }, function(serverTime) {
           var now = new Date();
 
           // compute median round trip time
@@ -616,9 +619,8 @@
 
           resolve();
         });
-      }).then(delay(5000)).then(pingpong);
+      })
     };
-    pingpong();
 
     // this function should be called periodically to ensure the Netflix
     // player matches our internal representation of the playback state
@@ -711,7 +713,7 @@
       lastKnownTime = data.lastKnownTime;
       lastKnownTimeUpdatedAt = new Date(data.lastKnownTimeUpdatedAt);
       state = data.state;
-      return swallow(sync);
+      return sync;
     };
 
     // the following allows us to linearize all tasks in the program to avoid interference
@@ -727,31 +729,34 @@
       tasksInFlight += 1;
       tasks = tasks.then(function() {
         if (getState() === 'idle') {
-          wakeUp();
+          swallow(wakeUp)();
         }
-      }).then(task).then(function() {
+      }).then(swallow(task)).then(function() {
         tasksInFlight -= 1;
       });
     };
 
-    // synchronize every 5 seconds just in case
-    setInterval(function() {
-      if (tasksInFlight === 0) {
-        pushTask(swallow(sync));
-      }
-    }, 5000);
-
     // broadcast the playback state if there is any user activity
     jQuery(window).mouseup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(swallow(broadcast(true)));
+        pushTask(broadcast(true));
       }
     });
 
     jQuery(window).keyup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(swallow(broadcast(true)));
+        pushTask(broadcast(true));
       }
+    });
+
+    socket.on('connect', function() {
+      pushTask(ping);
+      setInterval(function() {
+        if (tasksInFlight === 0) {
+          pushTask(ping);
+          pushTask(sync);
+        }
+      }, 5000);
     });
 
     // if the server goes down, it can reconstruct the session with this
@@ -833,7 +838,7 @@
             sessionId = data.sessionId;
             state = data.state;
             videoId = request.data.videoId;
-            pushTask(swallow(broadcast(false)));
+            pushTask(broadcast(false));
             sendResponse({
               sessionId: sessionId
             });
