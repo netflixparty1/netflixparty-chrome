@@ -399,6 +399,11 @@
           padding-left: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageHorizontalPadding}px;
         }
 
+        #chat-container #chat-history-container #chat-history .chat-message.system-message .chat-message-body {
+          font-style: italic;
+          color: #666;
+        }
+
         #chat-container #presence-indicator {
           position: absolute;
           left: ${chatSidebarPadding}px;
@@ -557,7 +562,7 @@
     var addMessage = function(message) {
       messages.push(message);
       jQuery('#chat-history').append(`
-        <div class="chat-message">
+        <div class="chat-message${ message.isSystemMessage ? ' system-message' : '' }">
           <div class="chat-message-avatar"><img src="data:image/png;base64,${new Identicon(Sha256.hash(message.userId).substr(0, 32), avatarSize * 2, 0).toString()}" /></div>
           <div class="chat-message-body">${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
