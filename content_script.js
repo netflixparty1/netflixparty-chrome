@@ -745,6 +745,13 @@
       pushTask(ping);
       setInterval(function() {
         if (tasksInFlight === 0) {
+          var newVideoId = parseInt(window.location.href.match(/^.*\/([0-9]+)\??.*/)[1]);
+          if (videoId !== null && videoId !== newVideoId) {
+            videoId = newVideoId;
+            sessionId = null;
+            setChatVisible(false);
+          }
+
           pushTask(ping);
           pushTask(sync);
         }
@@ -799,8 +806,8 @@
                 sendResponse({
                   errorMessage: 'That session is for a different video.'
                 });
-                return;
               });
+              return;
             }
 
             initChat();
