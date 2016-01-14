@@ -3,21 +3,33 @@
   <head>
     <title>Netflix Party</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="normalize.css">
     <link rel="stylesheet" href="popup.css">
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="popup.js"></script>
   </head>
   <body>
     <div class="no-error">
-      <input id="session-id" type="text" autocomplete="off" autofocus placeholder="Session ID"/>
       <div class="disconnected">
+        <h2>Create a session</h2>
+        <p>
+          <label><input type="checkbox" id="control-lock"> Only I have control</label>
+        </p>
+        <p>
+          <button id="create-session" type="button">Create session</button>
+          <i class="spinner fa fa-circle-o-notch fa-spin hidden"></i>
+        </p>
+        <hr />
+        <h2>Join a session</h2>
+        <input id="session-id-input" type="text" autocomplete="off" autofocus placeholder="Session ID" />
         <p>
           <button id="join-session" type="button">Join session</button>
-          <button id="create-session" type="button">Create session</button>
           <i class="spinner fa fa-circle-o-notch fa-spin hidden"></i>
         </p>
       </div>
       <div class="connected hidden">
+        <h3>Session ID:</h3>
+        <input id="session-id-info" type="text" readonly="true" autocomplete="off" autofocus />
         <p>
           <label><input type="checkbox" id="show-chat"> Show chat</label>
         </p>

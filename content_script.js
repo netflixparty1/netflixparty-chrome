@@ -587,6 +587,7 @@
     var sessionId = null;
     var lastKnownTime = null;
     var lastKnownTimeUpdatedAt = null;
+    var ownerId = null;
     var state = null;
     var videoId = null;
 
@@ -685,6 +686,9 @@
           if (state === newState && Math.abs(localTime - serverTime) < 1) {
             return Promise.resolve();
           } else {
+            var oldLastKnownTime = lastKnownTime;
+            var oldLastKnownTimeUpdatedAt = lastKnownTimeUpdatedAt;
+            var oldState = state;
             lastKnownTime = newLastKnownTime;
             lastKnownTimeUpdatedAt = newLastKnownTimeUpdatedAt;
             state = newState;
@@ -693,7 +697,16 @@
                 lastKnownTime: newLastKnownTime,
                 lastKnownTimeUpdatedAt: newLastKnownTimeUpdatedAt.getTime(),
                 state: newState
-              }, resolve);
+              }, function(data) {
+                if (data !== undefined && data.errorMessage !== null) {
+                  lastKnownTime = oldLastKnownTime;
+                  lastKnownTimeUpdatedAt = oldLastKnownTimeUpdatedAt;
+                  state = oldState;
+                  reject();
+                } else {
+                  resolve();
+                }
+              });
             });
           }
         });
@@ -731,13 +744,17 @@
     // broadcast the playback state if there is any user activity
     jQuery(window).mouseup(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(broadcast(true));
+        pushTask(function() {
+          return broadcast(true)().catch(sync);
+        });
       }
     });
 
     jQuery(window).keydown(function() {
       if (sessionId !== null && uiEventsHappening === 0) {
-        pushTask(broadcast(true));
+        pushTask(function() {
+          return broadcast(true)().catch(sync);
+        });
       }
     });
 
@@ -767,6 +784,7 @@
           lastKnownTimeUpdatedAt: lastKnownTimeUpdatedAt.getTime(),
           messages: messages,
           state: state,
+          ownerId: ownerId,
           userId: userId,
           videoId: videoId
         }, function(data) {
@@ -790,6 +808,28 @@
             chatVisible: getChatVisible()
           });
           return;
+        }
+
+        if (request.type === 'createSession') {
+          socket.emit('createSession', {
+            controlLock: request.data.controlLock,
+            videoId: request.data.videoId
+          }, function(data) {
+            initChat();
+            setChatVisible(true);
+            lastKnownTime = data.lastKnownTime;
+            lastKnownTimeUpdatedAt = new Date(data.lastKnownTimeUpdatedAt);
+            messages = [];
+            sessionId = data.sessionId;
+            ownerId = request.data.controlLock ? userId : null;
+            state = data.state;
+            videoId = request.data.videoId;
+            pushTask(broadcast(false));
+            sendResponse({
+              sessionId: sessionId
+            });
+          });
+          return true;
         }
 
         if (request.type === 'joinSession') {
@@ -819,28 +859,11 @@
             for (var i = 0; i < data.messages.length; i += 1) {
               addMessage(data.messages[i]);
             }
+            ownerId = data.ownerId;
             state = data.state;
             videoId = request.data.videoId;
             pushTask(receive(data));
             sendResponse({});
-          });
-          return true;
-        }
-
-        if (request.type === 'createSession') {
-          socket.emit('createSession', request.data.videoId, function(data) {
-            initChat();
-            setChatVisible(true);
-            lastKnownTime = data.lastKnownTime;
-            lastKnownTimeUpdatedAt = new Date(data.lastKnownTimeUpdatedAt);
-            messages = [];
-            sessionId = data.sessionId;
-            state = data.state;
-            videoId = request.data.videoId;
-            pushTask(broadcast(false));
-            sendResponse({
-              sessionId: sessionId
-            });
           });
           return true;
         }

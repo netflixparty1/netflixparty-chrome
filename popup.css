@@ -37,10 +37,37 @@ input[type="text"]:focus {
   border-color: #158cba;
 }
 
-input[type="text"], p {
+input[type="text"], p, h2, h3 {
   display: block;
   margin: 16px;
 }
+
+h2 {
+  font-size: 1.2em;
+}
+
+h3 {
+  font-size: 1em;
+}
+
+hr {
+  height: 1px;
+  border: 0;
+  background-color: #ccc;
+  text-align: center;
+  margin: 16px 0;
+}
+hr:after {
+  content: 'OR';
+  display: inline-block;
+  position: relative;
+  top: -8px;
+  background-color: #fff;
+  padding: 0 10px;
+  color: #999;
+}
+
+
 
 .error {
   color: #c00;

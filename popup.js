@@ -16,13 +16,13 @@ $(function() {
       $('#close-error').click(function() {
         $('.no-error').removeClass('hidden');
         $('.some-error').addClass('hidden');
-        $('#session-id').focus();
+        $('#session-id-input').focus();
       });
 
       // set up the spinner
       var startSpinning = function() {
         $('.spinner').removeClass('hidden');
-        $('#session-id').prop('disabled', true);
+        $('#session-id-input').prop('disabled', true);
         $('#join-session').prop('disabled', true);
         $('#create-session').prop('disabled', true);
         $('#leave-session').prop('disabled', true);
@@ -30,7 +30,7 @@ $(function() {
 
       var stopSpinning = function() {
         $('.spinner').addClass('hidden');
-        $('#session-id').prop('disabled', false);
+        $('#session-id-input').prop('disabled', false);
         $('#join-session').prop('disabled', false);
         $('#create-session').prop('disabled', false);
         $('#leave-session').prop('disabled', false);
@@ -62,14 +62,15 @@ $(function() {
       var showConnected = function(sessionId) {
         $('.disconnected').addClass('hidden');
         $('.connected').removeClass('hidden');
-        $('#session-id').prop('readonly', true).val(sessionId).focus().select();
+        $('#session-id-info').val(sessionId).focus().select();
         $('#show-chat').prop('checked', true);
       };
 
       var showDisconnected = function() {
         $('.disconnected').removeClass('hidden');
         $('.connected').addClass('hidden');
-        $('#session-id').prop('readonly', false).val('').focus();
+        $('#control-lock').prop('checked', false);
+        $('#session-id-input').val('').focus();
       };
 
       // get the session if there is one
@@ -85,14 +86,14 @@ $(function() {
           return;
         }
         if (initData.sessionId === null) {
-          $('#session-id').focus();
+          $('#session-id-input').focus();
         } else {
           showConnected(initData.sessionId);
         }
         $('#show-chat').prop('checked', initData.chatVisible);
 
         // listen for the enter key in the session id field
-        $('#session-id').keydown(function(e) {
+        $('#session-id-input').keydown(function(e) {
           if (e.which === 13) {
             $('#join-session').click();
           }
@@ -100,7 +101,7 @@ $(function() {
 
         // listen for clicks on the "Join session" button
         $('#join-session').click(function() {
-          var sessionId = $('#session-id').val();
+          var sessionId = $('#session-id-input').val();
           sendMessage('joinSession', {
             sessionId: sessionId.replace(/^\s+|\s+$/g, '').toLowerCase(),
             videoId: videoId
@@ -112,6 +113,7 @@ $(function() {
         // listen for clicks on the "Create session" button
         $('#create-session').click(function() {
           sendMessage('createSession', {
+            controlLock: $('#control-lock').is(':checked'),
             videoId: videoId
           }, function(response) {
             showConnected(response.sessionId);
