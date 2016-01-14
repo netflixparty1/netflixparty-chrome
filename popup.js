@@ -21,7 +21,6 @@ $(function() {
 
       // set up the spinner
       var startSpinning = function() {
-        $('.spinner').removeClass('hidden');
         $('#session-id-input').prop('disabled', true);
         $('#join-session').prop('disabled', true);
         $('#create-session').prop('disabled', true);
@@ -29,7 +28,6 @@ $(function() {
       };
 
       var stopSpinning = function() {
-        $('.spinner').addClass('hidden');
         $('#session-id-input').prop('disabled', false);
         $('#join-session').prop('disabled', false);
         $('#create-session').prop('disabled', false);

@@ -51,9 +51,9 @@ h3 {
 }
 
 hr {
-  height: 1px;
+  height: 2px;
   border: 0;
-  background-color: #ccc;
+  background-color: #ddd;
   text-align: center;
   margin: 16px 0;
 }
@@ -61,10 +61,10 @@ hr:after {
   content: 'OR';
   display: inline-block;
   position: relative;
-  top: -8px;
+  top: -7px;
   background-color: #fff;
   padding: 0 10px;
-  color: #999;
+  color: #ccc;
 }
 
 

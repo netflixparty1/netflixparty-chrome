@@ -315,6 +315,10 @@
 
     // chat state
     var messages = [];
+    var unreadCount = 0;
+    var originalTitle = document.title;
+
+    // UI constants
     var chatSidebarWidth = 360;
     var chatSidebarPadding = 16;
     var avatarSize = 20;
@@ -573,7 +577,19 @@
         </div>
       `);
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
+      unreadCount += 1;
+      if (!document.hasFocus()) {
+        document.title = '(' + String(unreadCount) + ') ' + originalTitle;
+      }
     };
+
+    // clear the unread count when the window is focused
+    jQuery(window).focus(function() {
+      if (unreadCount > 0) {
+        unreadCount = 0;
+        document.title = originalTitle;
+      }
+    });
 
     //////////////////////////////////////////////////////////////////////////
     // Main logic                                                           //
