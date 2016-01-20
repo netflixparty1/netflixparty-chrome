@@ -490,6 +490,7 @@
         jQuery('#chat-container').mouseup(function(e) {
           if ((e.pageX - oldPageX) * (e.pageX - oldPageX) + (e.pageY - oldPageY) * (e.pageY - oldPageY) < 5) {
             jQuery('#chat-input').focus();
+            e.stopPropagation();
           }
         });
         jQuery('#chat-input-container').click(function(e) {
