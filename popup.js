@@ -62,6 +62,7 @@ $(function() {
         $('.connected').removeClass('hidden');
         $('#session-id-info').val(sessionId).focus().select();
         $('#show-chat').prop('checked', true);
+        showShareUrl(sessionId);
       };
 
       var showDisconnected = function() {
@@ -77,6 +78,17 @@ $(function() {
       }, function(initData) {
         // parse the video ID from the URL
         var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
+
+        // if there is a session id in the url, join that session.
+        var sessionIdFromUrl = getSessionIdFromUrl(tabs[0].url);
+        if(sessionIdFromUrl) {
+          sendMessage('joinSession', {
+            sessionId: sessionIdFromUrl,
+            videoId: videoId
+          }, function(response) {
+            showConnected(sessionIdFromUrl);
+          });
+        }
 
         // initial state
         if (initData.errorMessage) {
@@ -133,3 +145,19 @@ $(function() {
     }
   );
 });
+
+function showShareUrl(sessionId) {
+  var baseUrl;
+  chrome.windows.getCurrent(function(w) {
+    chrome.tabs.getSelected(w.id, function (response){
+      var url = response.url.split('?')[0]
+      $('#share-url').html(url + '?npSessionId=' + sessionId);
+    });
+  });
+}
+
+function getSessionIdFromUrl(url) {
+  if(url.includes('?npSessionId=')) {
+    return url.split('?npSessionId=')[1];
+  }
+}
