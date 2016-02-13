@@ -79,15 +79,10 @@ $(function() {
         // parse the video ID from the URL
         var videoId = parseInt(tabs[0].url.match(/^.*\/([0-9]+)\??.*/)[1]);
 
-        // if there is a session id in the url, join that session.
+        // if there is a session id in the url, fill the join session input with that value.
         var sessionIdFromUrl = getSessionIdFromUrl(tabs[0].url);
         if(sessionIdFromUrl) {
-          sendMessage('joinSession', {
-            sessionId: sessionIdFromUrl,
-            videoId: videoId
-          }, function(response) {
-            showConnected(sessionIdFromUrl);
-          });
+          $('#session-id-input').val(sessionIdFromUrl).focus().select();
         }
 
         // initial state
