@@ -152,7 +152,11 @@ function showShareUrl(sessionId) {
 }
 
 function getSessionIdFromUrl(url) {
-  if(url.includes('?npSessionId=')) {
-    return url.split('?npSessionId=')[1];
-  }
+  return getURLParameter(url, 'npSessionId');
+}
+
+function getURLParameter(url, key) {
+  var searchString = '?' + url.split('?')[1];
+  var regex = new RegExp('[?|&]' + key + '=' + '([^&;]+?)(&|#|;|$)');
+  return decodeURIComponent((regex.exec(searchString)||[,""])[1].replace(/\+/g, '%20')) || null
 }
