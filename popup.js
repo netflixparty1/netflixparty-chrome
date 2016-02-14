@@ -163,11 +163,9 @@ function getURLParameter(url, key) {
 }
 
 function initCopyShareUrl() {
-  var copyBtn = document.querySelector('#copy-btn');
-  copyBtn.addEventListener('click', function(event) {
-    var inputVal = document.querySelector('#share-url');
-    event.preventDefault();
-    inputVal.select();
+  $('#copy-btn').on('click', function(e) {
+    e.preventDefault();
+    $('#share-url').select();
     document.execCommand('copy');
   });
 }
