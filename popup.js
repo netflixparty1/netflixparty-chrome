@@ -81,7 +81,7 @@ $(function() {
 
         // if there is a session id in the url, fill the join session input with that value.
         var sessionIdFromUrl = getSessionIdFromUrl(tabs[0].url);
-        if(sessionIdFromUrl) {
+        if (sessionIdFromUrl) {
           $('#session-id-input').val(sessionIdFromUrl).focus().select();
         }
 
@@ -142,11 +142,12 @@ $(function() {
 });
 
 function showShareUrl(sessionId) {
-  var baseUrl;
   chrome.windows.getCurrent(function(w) {
-    chrome.tabs.getSelected(w.id, function (response){
-      var url = response.url.split('?')[0]
-      $('#share-url').html(url + '?npSessionId=' + sessionId);
+    chrome.tabs.getSelected(w.id, function (response) {
+      var url = response.url.split('?')[0];
+      var urlWithId = url + '?npSessionId=' + sessionId;
+      $('#share-url').val(urlWithId).focus().select();
+      initCopyShareUrl();
     });
   });
 }
@@ -160,3 +161,15 @@ function getURLParameter(url, key) {
   var regex = new RegExp('[?|&]' + key + '=' + '([^&;]+?)(&|#|;|$)');
   return decodeURIComponent((regex.exec(searchString)||[,""])[1].replace(/\+/g, '%20')) || null
 }
+
+function initCopyShareUrl() {
+  var copyBtn = document.querySelector('#copy-btn');
+  copyBtn.addEventListener('click', function(event) {
+    var inputVal = document.querySelector('#share-url');
+    event.preventDefault();
+    inputVal.select();
+    document.execCommand('copy');
+  });
+}
+
+
