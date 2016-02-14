@@ -171,5 +171,3 @@ function initCopyShareUrl() {
     document.execCommand('copy');
   });
 }
-
-
