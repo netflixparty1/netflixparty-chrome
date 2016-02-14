@@ -63,6 +63,7 @@ $(function() {
         $('#session-id-info').val(sessionId).focus().select();
         $('#show-chat').prop('checked', true);
         showShareUrl(sessionId);
+        bindCopyShareUrl();
       };
 
       var showDisconnected = function() {
@@ -147,7 +148,6 @@ function showShareUrl(sessionId) {
       var url = response.url.split('?')[0];
       var urlWithId = url + '?npSessionId=' + sessionId;
       $('#share-url').val(urlWithId).focus().select();
-      initCopyShareUrl();
     });
   });
 }
@@ -162,7 +162,7 @@ function getURLParameter(url, key) {
   return decodeURIComponent((regex.exec(searchString)||[,""])[1].replace(/\+/g, '%20')) || null
 }
 
-function initCopyShareUrl() {
+function bindCopyShareUrl() {
   $('#copy-btn').on('click', function(e) {
     e.preventDefault();
     $('#share-url').select();
