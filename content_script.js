@@ -330,10 +330,6 @@
     // this is the markup that needs to be injected onto the page for chat
     var chatHtml = `
       <style>
-        #netflix-player.with-chat {
-          width: calc(100% - ${chatSidebarWidth}px) !important;
-        }
-
         #chat-container, #chat-container * {
           box-sizing: border-box;
         }
@@ -571,12 +567,16 @@
     // add a message to the chat history
     var addMessage = function(message) {
       messages.push(message);
+      var messageid = messages.indexOf(message)
       jQuery('#chat-history').append(`
-        <div class="chat-message${ message.isSystemMessage ? ' system-message' : '' }">
+        <div class="chat-message${ message.isSystemMessage ? ' system-message' : '' }" id="NPMessage-${messageid}">
           <div class="chat-message-avatar"><img src="data:image/png;base64,${new Identicon(Sha256.hash(message.userId).substr(0, 32), avatarSize * 2, 0).toString()}" /></div>
           <div class="chat-message-body">${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
       `);
+      setTimeout(function(){
+      jQuery("#NPMessage-"+messageid).hide(500)
+      },5000)
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
       unreadCount += 1;
       if (!document.hasFocus()) {
