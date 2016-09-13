@@ -335,6 +335,7 @@
         }
 
         #chat-container {
+        pointer-events: none;
           width: ${chatSidebarWidth}px;
           height: 100%;
           position: absolute;
@@ -363,7 +364,7 @@
         }
 
         #chat-container #chat-history-container #chat-history .chat-message {
-          background-color: #222;
+          background-color: rgba(2,2,2,0.8);
           color: #999;
           padding: ${chatMessageVerticalPadding}px ${chatMessageHorizontalPadding}px;
           margin-top: ${chatVericalMargin}px;
@@ -413,7 +414,7 @@
           left: ${chatSidebarPadding}px;
           bottom: ${chatSidebarPadding}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
-          background-color: #111;
+          background-color: rgba(1,1,1,0.5);
           border: ${chatInputBorder}px solid #333;
           border-radius: 2px;
           overflow: auto;
@@ -437,14 +438,18 @@
           width: ${avatarSize}px;
           height: ${avatarSize}px;
         }
+        #chat-input-avatar, #chat-input, #chat-input-avatar{
+         background-color: rgba(0,0,0,0) !important;
+        }
 
         #chat-container #chat-input-container #chat-input {
+        pointer-events: all;
           display: block;
           height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageVerticalPadding * 2 - chatInputBorder * 2}px;
           line-height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2 - avatarSize - avatarPadding * 2 - avatarBorder * 2 - chatMessageHorizontalPadding - chatInputBorder}px;
           margin-left: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageHorizontalPadding - chatInputBorder}px;
-          background-color: #111;
+          background-color: rgba(1,1,1,0.5);
           border: none;
           outline-style: none;
           color: #999;
