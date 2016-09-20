@@ -581,7 +581,7 @@
       `);
       setTimeout(function(){
       jQuery("#NPMessage-"+messageid).hide(500)
-      },5000)
+      },15000)
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
       unreadCount += 1;
       if (!document.hasFocus()) {
