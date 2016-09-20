@@ -330,15 +330,12 @@
     // this is the markup that needs to be injected onto the page for chat
     var chatHtml = `
       <style>
-        #netflix-player.with-chat {
-          width: calc(100% - ${chatSidebarWidth}px) !important;
-        }
-
         #chat-container, #chat-container * {
           box-sizing: border-box;
         }
 
         #chat-container {
+        pointer-events: none;
           width: ${chatSidebarWidth}px;
           height: 100%;
           position: absolute;
@@ -367,7 +364,7 @@
         }
 
         #chat-container #chat-history-container #chat-history .chat-message {
-          background-color: #222;
+          background-color: rgba(2,2,2,0.8);
           color: #999;
           padding: ${chatMessageVerticalPadding}px ${chatMessageHorizontalPadding}px;
           margin-top: ${chatVericalMargin}px;
@@ -417,7 +414,7 @@
           left: ${chatSidebarPadding}px;
           bottom: ${chatSidebarPadding}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
-          background-color: #111;
+          background-color: rgba(1,1,1,0.5);
           border: ${chatInputBorder}px solid #333;
           border-radius: 2px;
           overflow: auto;
@@ -441,14 +438,18 @@
           width: ${avatarSize}px;
           height: ${avatarSize}px;
         }
+        #chat-input-avatar, #chat-input, #chat-input-avatar{
+         background-color: rgba(0,0,0,0) !important;
+        }
 
         #chat-container #chat-input-container #chat-input {
+        pointer-events: all;
           display: block;
           height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageVerticalPadding * 2 - chatInputBorder * 2}px;
           line-height: ${avatarSize + avatarPadding * 2 + avatarBorder * 2}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2 - avatarSize - avatarPadding * 2 - avatarBorder * 2 - chatMessageHorizontalPadding - chatInputBorder}px;
           margin-left: ${avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatMessageHorizontalPadding - chatInputBorder}px;
-          background-color: #111;
+          background-color: rgba(1,1,1,0.5);
           border: none;
           outline-style: none;
           color: #999;
@@ -571,12 +572,16 @@
     // add a message to the chat history
     var addMessage = function(message) {
       messages.push(message);
+      var messageid = messages.indexOf(message)
       jQuery('#chat-history').append(`
-        <div class="chat-message${ message.isSystemMessage ? ' system-message' : '' }">
+        <div class="chat-message${ message.isSystemMessage ? ' system-message' : '' }" id="NPMessage-${messageid}">
           <div class="chat-message-avatar"><img src="data:image/png;base64,${new Identicon(Sha256.hash(message.userId).substr(0, 32), avatarSize * 2, 0).toString()}" /></div>
           <div class="chat-message-body">${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
       `);
+      setTimeout(function(){
+      jQuery("#NPMessage-"+messageid).hide(500)
+      },15000)
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
       unreadCount += 1;
       if (!document.hasFocus()) {
