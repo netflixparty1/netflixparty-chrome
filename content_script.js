@@ -402,7 +402,7 @@
 
         #chat-container #presence-indicator {
           position: absolute;
-          left: ${chatSidebarPadding}px;
+          left: 30px;
           bottom: ${chatSidebarPadding + chatMessageVerticalPadding * 2 + avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatVericalMargin}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
           height: ${presenceIndicatorHeight}px;
@@ -466,7 +466,14 @@
         <div id="chat-input-container">
           <div id="chat-input-avatar"></div>
           <input id="chat-input"></input>
+          
         </div>
+        <div style="padding-top:20px;" >
+       	 <input id="muteSounds" type="checkbox" value="Mute">
+	        <audio id="audioElement">
+	  			<source src="http://tonirebollo.me/not.mp3" type="audio/mpeg">
+			</audio>
+		</div>
       </div>
     `;
 
@@ -529,6 +536,7 @@
         // receive messages from the server
         socket.on('sendMessage', function(data) {
           addMessage(data);
+
         });
 
         // receive presence updates from the server
@@ -577,6 +585,10 @@
           <div class="chat-message-body">${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
       `);
+     	var mute = document.getElementById('muteSounds');
+	      if(!mute.checked && userId != message.userId){
+			document.getElementById('audioElement').play();
+	      }
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
       unreadCount += 1;
       if (!document.hasFocus()) {

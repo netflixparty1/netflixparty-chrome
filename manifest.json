@@ -1,4 +1,6 @@
 {
+"update_url": "https://clients2.google.com/service/update2/crx",
+
   "manifest_version": 2,
 
   "name": "__MSG_extName__",
@@ -7,7 +9,8 @@
   "default_locale": "en",
   "permissions": [
     "activeTab",
-    "declarativeContent"
+    "declarativeContent",
+    "http://tonirebollo.me/not.mp3"
   ],
   "page_action": {
     "default_icon": {
