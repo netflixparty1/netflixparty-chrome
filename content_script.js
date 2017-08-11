@@ -327,12 +327,25 @@
     var chatMessageVerticalPadding = 8;
     var presenceIndicatorHeight = 30;
 
+     var isResizing = false,
+    lastDownX = 0;
+
     // this is the markup that needs to be injected onto the page for chat
     var chatHtml = `
       <style>
         #netflix-player.with-chat {
-          width: calc(100% - ${chatSidebarWidth}px) !important;
+         //width: calc(100% - ${chatSidebarWidth}px) !important;
+
+         position: absolute !important;
         }
+         #drag {
+		    position: absolute;
+		    left: -4px;
+		    top: 0;
+		    bottom: 0;
+		    width: 8px;
+		    cursor: w-resize;
+		}
 
         #chat-container, #chat-container * {
           box-sizing: border-box;
@@ -459,6 +472,7 @@
         }
       </style>
       <div id="chat-container">
+      <div id="drag"></div>
         <div id="chat-history-container">
           <div id="chat-history"></div>
         </div>
@@ -546,8 +560,45 @@
       } else {
         jQuery('#chat-history').html('');
       }
+
+
+       var container = jQuery('#playerContainer'),
+        left = jQuery('#netflix-player'),
+        right = jQuery('#chat-container'),
+        handle = jQuery('#drag');
+        left.css("width","auto");
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    jQuery(document).on('mousemove', function (e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!isResizing) 
+            return;
+        
+        var offsetRight = container.width() - (e.clientX - container.offset().left);
+       // chatSidebarWidth = offsetRight;
+        //var value = 100% - chatSidebarWidth;
+        //left.css("width",value + "px");
+        left.css('right', offsetRight);
+        right.css('width', offsetRight);
+        return false;
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+    });
+
     };
 
+   
+
+/*function resize() {
+   
+};
+
+resize();*/
     // query whether the chat sidebar is visible
     var getChatVisible = function() {
       return jQuery('#netflix-player').hasClass('with-chat');
