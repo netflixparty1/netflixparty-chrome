@@ -327,12 +327,25 @@
     var chatMessageVerticalPadding = 8;
     var presenceIndicatorHeight = 30;
 
+     var isResizing = false,
+    lastDownX = 0;
+
     // this is the markup that needs to be injected onto the page for chat
     var chatHtml = `
       <style>
         #netflix-player.with-chat {
-          width: calc(100% - ${chatSidebarWidth}px) !important;
+         //width: calc(100% - ${chatSidebarWidth}px) !important;
+
+         position: absolute !important;
         }
+         #drag {
+		    position: absolute;
+		    left: -4px;
+		    top: 0;
+		    bottom: 0;
+		    width: 8px;
+		    cursor: w-resize;
+		}
 
         #chat-container, #chat-container * {
           box-sizing: border-box;
@@ -400,9 +413,13 @@
           color: #666;
         }
 
+        #chat-history{
+        	width:100% !important;
+        }
+
         #chat-container #presence-indicator {
           position: absolute;
-          left: ${chatSidebarPadding}px;
+          left: 30px;
           bottom: ${chatSidebarPadding + chatMessageVerticalPadding * 2 + avatarSize + avatarPadding * 2 + avatarBorder * 2 + chatVericalMargin}px;
           width: ${chatSidebarWidth - chatSidebarPadding * 2}px;
           height: ${presenceIndicatorHeight}px;
@@ -459,6 +476,7 @@
         }
       </style>
       <div id="chat-container">
+      <div id="drag"></div>
         <div id="chat-history-container">
           <div id="chat-history"></div>
         </div>
@@ -466,7 +484,14 @@
         <div id="chat-input-container">
           <div id="chat-input-avatar"></div>
           <input id="chat-input"></input>
+          
         </div>
+        <div style="padding-top:20px;" >
+       	 <input id="muteSounds" type="checkbox" value="Mute">
+	        <audio id="audioElement">
+	  			<source src="http://tonirebollo.me/not.mp3" type="audio/mpeg">
+			</audio>
+		</div>
       </div>
     `;
 
@@ -529,6 +554,7 @@
         // receive messages from the server
         socket.on('sendMessage', function(data) {
           addMessage(data);
+
         });
 
         // receive presence updates from the server
@@ -538,8 +564,45 @@
       } else {
         jQuery('#chat-history').html('');
       }
+
+
+       var container = jQuery('#playerContainer'),
+        left = jQuery('#netflix-player'),
+        right = jQuery('#chat-container'),
+        handle = jQuery('#drag');
+        left.css("width","auto");
+
+    handle.on('mousedown', function (e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+    });
+
+    jQuery(document).on('mousemove', function (e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!isResizing) 
+            return;
+        
+        var offsetRight = container.width() - (e.clientX - container.offset().left);
+       // chatSidebarWidth = offsetRight;
+        //var value = 100% - chatSidebarWidth;
+        //left.css("width",value + "px");
+        left.css('right', offsetRight);
+        right.css('width', offsetRight);
+        return false;
+    }).on('mouseup', function (e) {
+        // stop resizing
+        isResizing = false;
+    });
+
     };
 
+   
+
+/*function resize() {
+   
+};
+
+resize();*/
     // query whether the chat sidebar is visible
     var getChatVisible = function() {
       return jQuery('#netflix-player').hasClass('with-chat');
@@ -577,6 +640,10 @@
           <div class="chat-message-body">${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
         </div>
       `);
+     	var mute = document.getElementById('muteSounds');
+	      if(!mute.checked && userId != message.userId){
+			document.getElementById('audioElement').play();
+	      }
       jQuery('#chat-history').scrollTop(jQuery('#chat-history').prop('scrollHeight'));
       unreadCount += 1;
       if (!document.hasFocus()) {
