@@ -413,6 +413,10 @@
           color: #666;
         }
 
+        #chat-history{
+        	width:100% !important;
+        }
+
         #chat-container #presence-indicator {
           position: absolute;
           left: 30px;
