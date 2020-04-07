@@ -45,12 +45,29 @@ $(function() {
         $('#leave-session').prop('disabled', false);
       };
 
+      const loadLibraries = (tabId, libs, callback) => {
+        const exec = index => {
+          if (index >= libs.length) {
+            return callback();
+          }
+          chrome.tabs.executeScript(tabId, {
+            file: libs[index]
+          }, () => exec(index + 1));
+        }
+        exec(0)
+      }
+
       // send a message to the content script
       var sendMessage = function(type, data, callback) {
         startSpinning();
-        chrome.tabs.executeScript(tabs[0].id, {
-          file: 'content_script.js'
-        }, function() {
+        loadLibraries(tabs[0].id, [
+          'libs/jquery.js',
+          'libs/socketio.js',
+          'libs/pnglib.js',
+          'libs/sha256.js',
+          'libs/identicon.js',
+          'content_script.js'
+        ], function() {
           chrome.tabs.sendMessage(tabs[0].id, {
             type: type,
             data: data
